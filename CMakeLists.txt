@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.15)
+project(Assignment3_Bernardi_Buoso_Benetollo)
+
+set(CMAKE_CXX_STANDARD 14)
+
+add_executable(Assignment3_Bernardi_Buoso_Benetollo einstein.cc)
