@@ -21,11 +21,15 @@ int main() {
     typedef non_repeat<myset>::set my_nonrepeat_set;
     std::cout << my_nonrepeat_set() << "-> " << index_count<my_nonrepeat_set>::value << "\n";
 
+    std::cout << set_diff<myset,my_nonrepeat_set>::type() << "\n";
+
     std::cout << is_same_nonrepeat<my_nonrepeat_set,Index_Set<5,2>>::value << ' ' <<
                  is_same_nonrepeat<my_nonrepeat_set,Index_Set<5,3,2>>::value << "\n\n";
 
 
+    std::cout << merge<myset,set_diff<Index_Set<2,5,4,4>,my_nonrepeat_set>::type>::type() << "\n";
 
+///*
 
     //testing Einstein notation
     tensor<int,rank<2>> t1(2,2), t2(2,2);
@@ -49,11 +53,12 @@ int main() {
     std::cout << '\n';
 
     tensor<int> t3(2,2,2), t4(2);
+     auto k=new_index;
     count=0;
     for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
                 *iter = count++;
 
-    t4(i) = t3(i,j,j)*t1(j,j)+t2(j,j);
+    t4(i) = t3(i,j,k)*t1(j,k)+t3(i,k,k);
     for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
                 std::cout << *iter << ' ';
     std::cout << '\n';
@@ -62,7 +67,7 @@ int main() {
     std::cout << '\n';
 
 
-    auto k=new_index;
+
     t2(i,j) = t1(i,k)*t1(k,j);
     for(auto iter=t2.begin(); iter!=t2.end(); ++iter)
                 std::cout << *iter << ' ';
@@ -83,5 +88,5 @@ int main() {
     for(auto iter=t6.begin(); iter!=t6.end(); ++iter)
                 std::cout << *iter << ' ';
     std::cout << '\n';
-
+//*/
 }
