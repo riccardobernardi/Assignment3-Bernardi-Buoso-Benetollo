@@ -250,7 +250,7 @@ protected:
     bool end() { return idxs[0]==widths[0]; }
 
     T& eval() { return *current_ptr; }
-    T& teval(int pos) { return *ptr[pos/N]; }
+    T& teval(int pos) { return ptr[pos/N]; }
 
     void next() {
         unsigned index = idxs.size()-1;
@@ -313,7 +313,7 @@ protected:
     T* const start_ptr;
     T* current_ptr;
     int N;
-    std::vector<T*> ptr = std::vector<T*>(N,0);
+    std::vector<T*> ptr = std::vector<T>(N,0);
 
     std::map<Index,index_data> index_map;
 };
@@ -408,7 +408,10 @@ protected:
 
     bool end() { return exp1.end(); }
 
-
+    void at(int x) {
+        exp1.at(x);
+        exp2.at(x);
+    }
 
     void next() {
         exp1.next();
@@ -536,8 +539,6 @@ protected:
         exp1.at(x);
         exp2.at(x);
     }
-
-    T teval(int pos) { return exp1.teval(pos) * exp2.teval(pos); }
 
     std::map<Index,index_data>& get_index_map() { return index_map; }
 
