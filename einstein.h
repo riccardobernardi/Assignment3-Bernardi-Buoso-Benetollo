@@ -173,8 +173,10 @@ public:
             for(int i=0; i<N; i++){
                 threads.push_back(std::thread([=](){
                     printf("ciao sono il thread %d", i);
-                    for(int j=0; i<span;j++){
-                        eval(i*span+j) += x.eval(i*span+j);
+                    for(int j=0; j<span;j++){
+                        teval(i*span+j) += x.teval(i*span+j);
+                        at(i*span+j);
+                        x.at(i*span+j);
                     };
                 }));
             }
@@ -221,7 +223,7 @@ public:
 
 protected:
 
-    einstein_expression(T*ptr) :  repeated_num(0), start_ptr(ptr) {}
+    einstein_expression(T*ptr, int N) :  repeated_num(0), start_ptr(ptr), N(N) {}
 
     std::map<Index,index_data>& get_index_map() { return index_map; }
 
@@ -235,6 +237,9 @@ protected:
             idxs.push_back(0);
         }
         current_ptr=start_ptr;
+        for(auto pt: ptr ){
+            *pt = start_ptr;
+        }
     }
 
     void reset() {
@@ -245,6 +250,7 @@ protected:
     bool end() { return idxs[0]==widths[0]; }
 
     T& eval() { return *current_ptr; }
+    T& teval(int pos) { return *ptr[pos/N]; }
 
     void next() {
         unsigned index = idxs.size()-1;
@@ -258,6 +264,30 @@ protected:
             --index;
             ++idxs[index];
             current_ptr += strides[index];
+        }
+    }
+
+    void at(int x) {
+        T* ptr=ptr[x/N];
+        std::vector<size_t> idxs;
+        for (auto i=index_map.begin(); i!=index_map.end(); ++i) {
+            idxs.push_back(0);
+        }
+
+        unsigned index = idxs.size()-1;
+
+        for(int i = 0; i<x; i++){
+            ++idxs[index];
+            current_ptr += strides[index];
+
+            while(idxs[index]==widths[index] && index>0) {
+                idxs[index]=0;
+                ptr -= widths[index]*strides[index];
+
+                --index;
+                ++idxs[index];
+                ptr += strides[index];
+            }
         }
     }
 
@@ -282,6 +312,8 @@ protected:
 
     T* const start_ptr;
     T* current_ptr;
+    int N;
+    std::vector<T*> ptr = std::vector<T*>(N,0);
 
     std::map<Index,index_data> index_map;
 };
@@ -500,6 +532,13 @@ protected:
         exp2.next();
     }
 
+    void at(int x) {
+        exp1.at(x);
+        exp2.at(x);
+    }
+
+    T teval(int pos) { return exp1.teval(pos) * exp2.teval(pos); }
+
     std::map<Index,index_data>& get_index_map() { return index_map; }
 
     std::pair<tensor<T,dynamic>,einstein_expression<T,dynamic>> prepare_conversion() {
@@ -555,6 +594,7 @@ public:
 protected:
 
     T eval() { return exp1.eval() + exp2.eval(); }
+    T teval(int pos) { return exp1.teval(pos) + exp2.teval(pos); }
 };
 
 // subtraction
@@ -580,6 +620,7 @@ public:
 protected:
 
     T eval() { return exp1.eval() - exp2.eval(); }
+    T teval(int pos) { return exp1.teval(pos) - exp2.teval(pos); }
 };
 
 
