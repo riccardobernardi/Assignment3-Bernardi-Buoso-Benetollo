@@ -1,6 +1,7 @@
 #ifndef EINSTEIN
 #define EINSTEIN
 #include<map>
+#include <thread>
 
 namespace Tensor {
 /*
@@ -106,15 +107,6 @@ template<unsigned head, unsigned...tail, class U> struct is_same_nonrepeat<Index
 };
 
 
-
-
-
-
-
-
-
-
-
 struct einstein_proxy;
 template<class T, class U> struct einstein_binary;
 template<class T, class U> struct einstein_multiplication;
@@ -168,12 +160,26 @@ public:
         setup();
         x.setup();
 
-
-        while(!end()) {
-            eval() += x.eval();
-            next();
-            x.next();
+        int N=2;
+        std::vector<std::thread> threads;
+        if(N==1){
+            while(!end()) {
+                eval() += x.eval();
+                next();
+                x.next();
+            }
+        }else{
+            int span = strides[0]*widths[0]/N; //number of cells for every thread
+            for(int i=0; i<N; i++){
+                threads.push_back(std::thread([=](){
+                    printf("ciao sono il thread %d", i);
+                    for(int j=0; i<span;j++){
+                        eval(i*span+j) += x.eval(i*span+j);
+                    };
+                }));
+            }
         }
+
 
         return *this;
     }
@@ -283,10 +289,12 @@ protected:
 
 
 
+//######################## DYNAMIC
 
-
+// multiplication
 //Using composite for the expressions.
-template<typename T, class E1, class E2> class einstein_expression<T,dynamic,einstein_multiplication<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> {
+template<typename T, class E1, class E2>
+class einstein_expression<T,dynamic,einstein_multiplication<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> {
 public:
 
     //I am aligning all the Index_sets of all the expressions at all times so that each acn iterate independently andthey will be synchronized
@@ -409,8 +417,7 @@ protected:
     std::map<Index,index_data> index_map;
 };
 
-
-
+// binary
 //Using composite for the expressions. This is the base for addition and subtraction, so as to avoid code duplication since only eval() changes between them
 template<typename T, class E1, class E2> class einstein_expression<T,dynamic,einstein_binary<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> {
 public:
@@ -525,11 +532,7 @@ protected:
     std::map<Index,index_data> index_map;
 };
 
-
-
-
-
-
+// addition
 template<typename T, class E1, class E2> class einstein_expression<T,dynamic,einstein_addition<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> :
         public einstein_expression<T,dynamic,einstein_binary<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> {
     using einstein_expression<T,dynamic,einstein_binary<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>>::einstein_expression;
@@ -554,7 +557,7 @@ protected:
     T eval() { return exp1.eval() + exp2.eval(); }
 };
 
-
+// subtraction
 template<typename T, class E1, class E2> class einstein_expression<T,dynamic,einstein_subtraction<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> :
         public einstein_expression<T,dynamic,einstein_binary<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> {
     using einstein_expression<T,dynamic,einstein_binary<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>>::einstein_expression;
@@ -580,7 +583,7 @@ protected:
 };
 
 
-
+//######################## STATIC
 
 /* einstein_expression counterparts holding (and checking) static index information
  * they inherit from the base classes as the runtime behavior is the same: they are needed only to add comiletime behavior
@@ -601,7 +604,7 @@ public:
     }
 };
 
-
+// multiplication
 template<typename T, class E1, class E2, unsigned...idx>
 class einstein_expression<T,Index_Set<idx...>,einstein_multiplication<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> :
         public einstein_expression<T,dynamic,einstein_multiplication<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> {
@@ -609,7 +612,7 @@ public:
     using einstein_expression<T,dynamic,einstein_multiplication<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>>::einstein_expression;
 };
 
-
+// addition
 template<typename T, class E1, class E2, unsigned...idx>
 class einstein_expression<T,Index_Set<idx...>,einstein_addition<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> :
         public einstein_expression<T,dynamic,einstein_addition<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> {
@@ -617,7 +620,7 @@ public:
     using einstein_expression<T,dynamic,einstein_addition<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>>::einstein_expression;
 };
 
-
+// subtraction
 template<typename T, class E1, class E2, unsigned...idx>
 class einstein_expression<T,Index_Set<idx...>,einstein_subtraction<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> :
         public einstein_expression<T,dynamic,einstein_subtraction<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> {
@@ -625,6 +628,8 @@ public:
     using einstein_expression<T,dynamic,einstein_subtraction<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>>::einstein_expression;
 };
 
+
+//######################## OPERATORS
 
 /* The actual binary operators return the composite thus forcing delayed-evaluation */
 
