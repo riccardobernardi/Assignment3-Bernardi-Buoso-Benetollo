@@ -31,21 +31,21 @@ private:
 public:
     void launch_test(int x){
         if(x == -1){
-            for(unsigned long i=0; i<_functions.size();++i){
+            for(unsigned long i=1; i<_functions.size()+1;++i){
                 //pid_t pid = fork();
                 //if (pid == 0) {
-                std::cout << "vvvv---------------TEST " << i << "-----------------------vvvv" << std::endl;
+                std::cout << "vvvv---------------TEST " << i+ 1<< "-----------------------vvvv" << std::endl;
                 _functions[i]();
                 std::cout << std::endl << "***Concluso test [" << _names[i] << "]" << std::endl;
-                std::cout << "^^^^---------------TEST " << i << "-----------------------^^^^" << std::endl;
+                std::cout << "^^^^---------------TEST " << i+1 << "-----------------------^^^^" << std::endl;
                 //}else{}
             }
         }else{
             //pid_t pid = fork();
             //if (pid == 0) {
             std::cout << "vvvv---------------TEST " << x << "-----------------------vvvv" << std::endl;
-            _functions[x]();
-            std::cout << std::endl << "***Concluso test [" << _names[x] << "]" << std::endl;
+            _functions[x-1]();
+            std::cout << std::endl << "***Concluso test [" << _names[x-1] << "]" << std::endl;
             std::cout << "^^^^---------------TEST " << x << "-----------------------^^^^" << std::endl;
             //}else{}
         }
