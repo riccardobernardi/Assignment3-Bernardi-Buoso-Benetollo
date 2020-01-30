@@ -195,7 +195,6 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
                     }
 
                     threads.push_back(std::thread([=](){
-                        //std::cout << "ciao sono il thread" << i << std::endl;
                         for(int k = 0; k< span; k++) {
                             teval(thread_indxs[i]) += x.teval(thread_indxs[i]);
                         }

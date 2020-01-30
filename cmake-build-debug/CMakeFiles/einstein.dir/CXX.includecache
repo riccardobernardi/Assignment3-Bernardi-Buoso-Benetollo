@@ -1,0 +1,44 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/tommyb/Unive/Magistrale/Adv Al 2/Assignment3-Bernardi-Buoso-Benetollo/einstein.cc
+iostream
+-
+tensor.h
+/home/tommyb/Unive/Magistrale/Adv Al 2/Assignment3-Bernardi-Buoso-Benetollo/tensor.h
+
+/home/tommyb/Unive/Magistrale/Adv Al 2/Assignment3-Bernardi-Buoso-Benetollo/einstein.h
+map
+-
+thread
+-
+
+/home/tommyb/Unive/Magistrale/Adv Al 2/Assignment3-Bernardi-Buoso-Benetollo/tensor.h
+cstdlib
+-
+cassert
+-
+utility
+-
+memory
+-
+type_traits
+-
+initializer_list
+-
+vector
+-
+algorithm
+-
+tensor_fwd.h
+/home/tommyb/Unive/Magistrale/Adv Al 2/Assignment3-Bernardi-Buoso-Benetollo/tensor_fwd.h
+einstein.h
+/home/tommyb/Unive/Magistrale/Adv Al 2/Assignment3-Bernardi-Buoso-Benetollo/einstein.h
+
+/home/tommyb/Unive/Magistrale/Adv Al 2/Assignment3-Bernardi-Buoso-Benetollo/tensor_fwd.h
+
