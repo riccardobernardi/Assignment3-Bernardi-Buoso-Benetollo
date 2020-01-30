@@ -107,6 +107,15 @@ template<unsigned head, unsigned...tail, class U> struct is_same_nonrepeat<Index
 };
 
 
+
+
+
+
+
+
+
+
+
 struct einstein_proxy;
 template<class T, class U> struct einstein_binary;
 template<class T, class U> struct einstein_multiplication;
@@ -160,7 +169,7 @@ public:
         setup();
         x.setup();
 
-        int N=2;
+
         std::vector<std::thread> threads;
         if(N==1){
             while(!end()) {
@@ -170,19 +179,23 @@ public:
             }
         }else{
             int span = strides[0]*widths[0]/N; //number of cells for every thread
-            for(int i=0; i<N; i++){
+            for(int i = 0; i<N; i++){
+                int tpos = i*span;
+                // we assume a "correct" number of threads
+                for(int j = widths.size(); j>=0;--j){
+                    thread_indxs[i][j] = tpos%widths[j];
+                    tpos = tpos/widths[j];
+                }
+                // thread_indxs[i]
                 threads.push_back(std::thread([=](){
                     printf("ciao sono il thread %d", i);
-                    for(int j=0; j<span;j++){
-                        teval(i*span+j) += x.teval(i*span+j);
-                        at(i*span+j);
-                        x.at(i*span+j);
+                    for(int k = 0; k< span; k++) {
+                        teval(thread_indxs[i]) += x.teval(thread_indxs[i]);
                     };
                 }));
+                threads[i].join();
             }
         }
-
-
         return *this;
     }
 
@@ -223,7 +236,7 @@ public:
 
 protected:
 
-    einstein_expression(T*ptr, int N) :  repeated_num(0), start_ptr(ptr), N(N) {}
+    einstein_expression(T*ptr) :  repeated_num(0), start_ptr(ptr) {}
 
     std::map<Index,index_data>& get_index_map() { return index_map; }
 
@@ -237,9 +250,6 @@ protected:
             idxs.push_back(0);
         }
         current_ptr=start_ptr;
-        for(auto pt: ptr ){
-            *pt = start_ptr;
-        }
     }
 
     void reset() {
@@ -250,7 +260,22 @@ protected:
     bool end() { return idxs[0]==widths[0]; }
 
     T& eval() { return *current_ptr; }
-    T& teval(int pos) { return ptr[pos/N]; }
+
+    T& teval(std::vector<size_t> indxs) const {
+        T* ptr = start_ptr;
+        for(int i=indxs.size(); i>=0; --i){
+            ptr +=indxs[i]*strides[i];
+        }
+
+        indxs[widths.size() - 1] += 1;
+        for(int i=widths.size(); i>=0; --i ){
+            if(indxs[i] > widths[i]){
+                indxs[i] -=1;
+                indxs[i-1] +=1;
+            }
+        }
+        return *ptr;
+    }
 
     void next() {
         unsigned index = idxs.size()-1;
@@ -264,30 +289,6 @@ protected:
             --index;
             ++idxs[index];
             current_ptr += strides[index];
-        }
-    }
-
-    void at(int x) {
-        T* ptr=ptr[x/N];
-        std::vector<size_t> idxs;
-        for (auto i=index_map.begin(); i!=index_map.end(); ++i) {
-            idxs.push_back(0);
-        }
-
-        unsigned index = idxs.size()-1;
-
-        for(int i = 0; i<x; i++){
-            ++idxs[index];
-            current_ptr += strides[index];
-
-            while(idxs[index]==widths[index] && index>0) {
-                idxs[index]=0;
-                ptr -= widths[index]*strides[index];
-
-                --index;
-                ++idxs[index];
-                ptr += strides[index];
-            }
         }
     }
 
@@ -309,11 +310,11 @@ protected:
     std::vector<size_t> widths;
     std::vector<size_t> strides;
     std::vector<size_t> idxs;
+    size_t N=2;
+    std::vector<std::vector<size_t>> thread_indxs = std::vector<std::vector<size_t>>(N);
 
     T* const start_ptr;
     T* current_ptr;
-    int N;
-    std::vector<T*> ptr = std::vector<T>(N,0);
 
     std::map<Index,index_data> index_map;
 };
@@ -321,12 +322,10 @@ protected:
 
 
 
-//######################## DYNAMIC
 
-// multiplication
+
 //Using composite for the expressions.
-template<typename T, class E1, class E2>
-class einstein_expression<T,dynamic,einstein_multiplication<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> {
+template<typename T, class E1, class E2> class einstein_expression<T,dynamic,einstein_multiplication<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> {
 public:
 
     //I am aligning all the Index_sets of all the expressions at all times so that each acn iterate independently andthey will be synchronized
@@ -408,10 +407,7 @@ protected:
 
     bool end() { return exp1.end(); }
 
-    void at(int x) {
-        exp1.at(x);
-        exp2.at(x);
-    }
+
 
     void next() {
         exp1.next();
@@ -419,6 +415,9 @@ protected:
     }
 
     T eval() { return exp1.eval() * exp2.eval(); }
+    T teval(std::vector<size_t> indxs) const {
+        return exp1.teval(indxs) * exp2.teval(indxs);
+    }
 
     std::map<Index,index_data>& get_index_map() { return index_map; }
 
@@ -452,7 +451,8 @@ protected:
     std::map<Index,index_data> index_map;
 };
 
-// binary
+
+
 //Using composite for the expressions. This is the base for addition and subtraction, so as to avoid code duplication since only eval() changes between them
 template<typename T, class E1, class E2> class einstein_expression<T,dynamic,einstein_binary<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> {
 public:
@@ -529,15 +529,9 @@ protected:
     bool end() { return exp1.end(); }
 
 
-
     void next() {
         exp1.next();
         exp2.next();
-    }
-
-    void at(int x) {
-        exp1.at(x);
-        exp2.at(x);
     }
 
     std::map<Index,index_data>& get_index_map() { return index_map; }
@@ -572,7 +566,11 @@ protected:
     std::map<Index,index_data> index_map;
 };
 
-// addition
+
+
+
+
+
 template<typename T, class E1, class E2> class einstein_expression<T,dynamic,einstein_addition<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> :
         public einstein_expression<T,dynamic,einstein_binary<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> {
     using einstein_expression<T,dynamic,einstein_binary<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>>::einstein_expression;
@@ -595,10 +593,12 @@ public:
 protected:
 
     T eval() { return exp1.eval() + exp2.eval(); }
-    T teval(int pos) { return exp1.teval(pos) + exp2.teval(pos); }
+    T teval(std::vector<size_t> indxs) const {
+        return exp1.teval(indxs) + exp2.teval(indxs);
+    }
 };
 
-// subtraction
+
 template<typename T, class E1, class E2> class einstein_expression<T,dynamic,einstein_subtraction<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> :
         public einstein_expression<T,dynamic,einstein_binary<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> {
     using einstein_expression<T,dynamic,einstein_binary<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>>::einstein_expression;
@@ -621,11 +621,13 @@ public:
 protected:
 
     T eval() { return exp1.eval() - exp2.eval(); }
-    T teval(int pos) { return exp1.teval(pos) - exp2.teval(pos); }
+    T teval(std::vector<size_t> indxs) const {
+        return exp1.teval(indxs) - exp2.teval(indxs);
+    }
 };
 
 
-//######################## STATIC
+
 
 /* einstein_expression counterparts holding (and checking) static index information
  * they inherit from the base classes as the runtime behavior is the same: they are needed only to add comiletime behavior
@@ -646,7 +648,7 @@ public:
     }
 };
 
-// multiplication
+
 template<typename T, class E1, class E2, unsigned...idx>
 class einstein_expression<T,Index_Set<idx...>,einstein_multiplication<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> :
         public einstein_expression<T,dynamic,einstein_multiplication<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> {
@@ -654,7 +656,7 @@ public:
     using einstein_expression<T,dynamic,einstein_multiplication<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>>::einstein_expression;
 };
 
-// addition
+
 template<typename T, class E1, class E2, unsigned...idx>
 class einstein_expression<T,Index_Set<idx...>,einstein_addition<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> :
         public einstein_expression<T,dynamic,einstein_addition<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> {
@@ -662,7 +664,7 @@ public:
     using einstein_expression<T,dynamic,einstein_addition<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>>::einstein_expression;
 };
 
-// subtraction
+
 template<typename T, class E1, class E2, unsigned...idx>
 class einstein_expression<T,Index_Set<idx...>,einstein_subtraction<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> :
         public einstein_expression<T,dynamic,einstein_subtraction<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> {
@@ -670,8 +672,6 @@ public:
     using einstein_expression<T,dynamic,einstein_subtraction<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>>::einstein_expression;
 };
 
-
-//######################## OPERATORS
 
 /* The actual binary operators return the composite thus forcing delayed-evaluation */
 
