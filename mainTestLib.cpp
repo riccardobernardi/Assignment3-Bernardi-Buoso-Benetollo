@@ -197,7 +197,6 @@ void test12(){
 
     auto i=new_index;
     auto j=new_index;
-    auto k=new_index;
 
     tensor<int,rank<2>> t5=t1(i,j);
     for(auto iter=t5.begin(); iter!=t5.end(); ++iter)
@@ -226,6 +225,32 @@ void test13(){
     std::cout << '\n';
 }
 
+void test14(){
+    tensor<int,rank<2>> t1(2,2), t2(2,2);
+
+    int count=0;
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = count++;
+    count=0;
+    for(auto iter=t2.begin(); iter!=t2.end(); ++iter)
+        *iter = count++;
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        std::cout << *iter << ' ';
+    std::cout << '\n';
+    for(auto iter=t2.begin(); iter!=t2.end(); ++iter)
+        std::cout << *iter << ' ';
+    std::cout << '\n';
+
+    auto i=new_index;
+    auto j=new_index;
+
+    tensor<int,rank<2>> t6=t1(i,i)*t2(j,j);
+
+    for(auto iter=t6.begin(); iter!=t6.end(); ++iter)
+        std::cout << *iter << ' ';
+    std::cout << '\n';
+}
+
 
 int main(){
     Test a{};
@@ -242,6 +267,7 @@ int main(){
     a.add(test11, "test11");
     a.add(test12, "test12");
     a.add(test13, "test13");
+    a.add(test14, "test14");
 
-    a.launch_test(9);
+    a.launch_test(-1);
 }

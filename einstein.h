@@ -284,6 +284,7 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
                 ++indxs[index];
             }
 
+            //std::cout << *ptr << std::endl;
             return *ptr;
         }
 
@@ -320,7 +321,7 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
         std::vector<size_t> widths;
         std::vector<size_t> strides;
         std::vector<size_t> idxs;
-        size_t N=2;
+        size_t N=1;
         std::vector<std::vector<size_t>> thread_indxs = std::vector<std::vector<size_t>>(N);
 
 
