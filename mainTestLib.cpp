@@ -81,9 +81,6 @@ void test7(){
 
     t2(j,i) = t1(i,j);
 
-    std::cout << "Qui non funziona:)" << std::endl;
-
-
     for(auto iter=t2.begin(); iter!=t2.end(); ++iter)
         std::cout << *iter << ' ';
     std::cout << '\n';
@@ -269,5 +266,5 @@ int main(){
     a.add(test13, "test13");
     a.add(test14, "test14");
 
-    a.launch_test(-1);
+    a.launch_test(7);
 }

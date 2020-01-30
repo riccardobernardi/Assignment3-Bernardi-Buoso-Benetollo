@@ -179,8 +179,8 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
                 }
             }else{
                 size_t counter = 1;
-                for(auto w : widths){
-                    counter *= w;
+                for(auto w = widths.begin(); w != widths.end(); ++w){
+                    counter *= (*w);
                 }
                 int span = counter / N; //number of cells for every thread
 
@@ -189,17 +189,32 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
                     // we assume a "correct" number of threads
 
                     thread_indxs.at(i) = std::vector<size_t>(widths.size());
-                    for(int j = widths.size()-1; j>=0;--j){
+                    for(int j = widths.size()-1; j >= 0; --j){
                         thread_indxs.at(i).at(j) = tpos % widths.at(j);
                         tpos = tpos / widths.at(j);
                     }
 
-                    threads.push_back(std::thread([=](){
+                    threads.emplace_back(([this, &x](int span, std::vector<size_t> indxs){
                         for(int k = 0; k< span; k++) {
-                            teval(thread_indxs[i]) += x.teval(thread_indxs[i]);
+                            teval(indxs) += x.teval(indxs);
+
+                            unsigned index = indxs.size()-1;
+                            ++indxs[index];
+
+                            while(indxs[index]==widths[index] && index>0) {
+                                indxs[index]=0;
+
+                                --index;
+                                ++indxs[index];
+                            }
                         }
-                    }));
-                    threads[i].join();
+                    }), span, thread_indxs[i]);
+
+                    //threads[i].join();
+                }
+
+                for(auto t = threads.begin(); t != threads.end(); ++t){
+                    (*t).join();
                 }
             }
             return *this;
@@ -273,17 +288,6 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
                 ptr += indxs[i]*strides[i];
             }
 
-            unsigned index = indxs.size()-1;
-            ++indxs[index];
-
-            while(indxs[index]==widths[index] && index>0) {
-                indxs[index]=0;
-
-                --index;
-                ++indxs[index];
-            }
-
-            //std::cout << *ptr << std::endl;
             return *ptr;
         }
 
@@ -320,7 +324,7 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
         std::vector<size_t> widths;
         std::vector<size_t> strides;
         std::vector<size_t> idxs;
-        size_t N=1;
+        size_t N=2;
         std::vector<std::vector<size_t>> thread_indxs = std::vector<std::vector<size_t>>(N);
 
 
