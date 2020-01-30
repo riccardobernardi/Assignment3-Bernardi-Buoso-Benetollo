@@ -36,3 +36,4 @@ cmake-build-debug/Makefile
 .idea/vcs.xml
 .idea
 CMakeLists.txt
+*.o
