@@ -124,11 +124,7 @@ void test9(){
         std::cout << *iter << ' ';
     std::cout << '\n';
 
-    auto i=new_index;
-    auto j=new_index;
-
     tensor<int> t3(2,2,2), t4(2);
-    auto k=new_index;
 
     for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
         std::cout << *iter << ' ';
