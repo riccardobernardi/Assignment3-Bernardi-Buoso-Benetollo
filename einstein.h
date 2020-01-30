@@ -190,7 +190,7 @@ public:
                 threads.push_back(std::thread([=](){
                     printf("ciao sono il thread %d", i);
                     for(int k = 0; k< span; k++) {
-                        teval(thread_indxs[i]) += x.teval(thread_indxs[i]);
+                        teval(thread_indxs[i], i*span+k) += x.teval(thread_indxs[i], i*span+k);
                     };
                 }));
                 threads[i].join();
@@ -261,19 +261,9 @@ protected:
 
     T& eval() { return *current_ptr; }
 
-    T& teval(std::vector<size_t> indxs) const {
+    T& teval(std::vector<size_t> indxs, int plus) const {
         T* ptr = start_ptr;
-        for(int i=indxs.size(); i>=0; --i){
-            ptr +=indxs[i]*strides[i];
-        }
-
-        indxs[widths.size() - 1] += 1;
-        for(int i=widths.size(); i>=0; --i ){
-            if(indxs[i] > widths[i]){
-                indxs[i] -=1;
-                indxs[i-1] +=1;
-            }
-        }
+        ptr+=plus;
         return *ptr;
     }
 
@@ -415,8 +405,8 @@ protected:
     }
 
     T eval() { return exp1.eval() * exp2.eval(); }
-    T teval(std::vector<size_t> indxs) const {
-        return exp1.teval(indxs) * exp2.teval(indxs);
+    T teval(std::vector<size_t> indxs, int plus) const {
+        return exp1.teval(indxs, plus) * exp2.teval(indxs, plus);
     }
 
     std::map<Index,index_data>& get_index_map() { return index_map; }
@@ -593,8 +583,8 @@ public:
 protected:
 
     T eval() { return exp1.eval() + exp2.eval(); }
-    T teval(std::vector<size_t> indxs) const {
-        return exp1.teval(indxs) + exp2.teval(indxs);
+    T teval(std::vector<size_t> indxs, int plus) const {
+        return exp1.teval(indxs, plus) + exp2.teval(indxs, plus);
     }
 };
 
@@ -621,8 +611,8 @@ public:
 protected:
 
     T eval() { return exp1.eval() - exp2.eval(); }
-    T teval(std::vector<size_t> indxs) const {
-        return exp1.teval(indxs) - exp2.teval(indxs);
+    T teval(std::vector<size_t> indxs, int plus) const {
+        return exp1.teval(indxs, plus) - exp2.teval(indxs, plus);
     }
 };
 
