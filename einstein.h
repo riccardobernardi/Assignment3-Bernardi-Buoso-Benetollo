@@ -179,25 +179,26 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
                 }
             }else{
                 size_t counter = 1;
-                for(int i=0; i<widths.size();++i){
-                    counter*=widths.at(i);
+                for(auto w : widths){
+                    counter *= w;
                 }
-                int span = counter/N; //number of cells for every thread
-                for(int i = 0; i<N; i++){
+                int span = counter / N; //number of cells for every thread
+
+                for(int i = 0; i < N; ++i){
                     int tpos = i*span;
                     // we assume a "correct" number of threads
+
                     thread_indxs.at(i) = std::vector<size_t>(widths.size());
                     for(int j = widths.size()-1; j>=0;--j){
-                        //std::cout << i << j << std::endl;
-                        thread_indxs.at(i).at(j) = tpos%widths.at(j);
-                        tpos = tpos/widths.at(j);
+                        thread_indxs.at(i).at(j) = tpos % widths.at(j);
+                        tpos = tpos / widths.at(j);
                     }
-                    // thread_indxs[i]
+
                     threads.push_back(std::thread([=](){
                         //std::cout << "ciao sono il thread" << i << std::endl;
                         for(int k = 0; k< span; k++) {
                             teval(thread_indxs[i]) += x.teval(thread_indxs[i]);
-                        };
+                        }
                     }));
                     threads[i].join();
                 }
@@ -273,13 +274,16 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
                 ptr += indxs[i]*strides[i];
             }
 
-            indxs[widths.size() - 1] += 1;
-            for(int i=widths.size()-1; i>=0; --i ){
-                if(indxs[i] > widths[i]){
-                    indxs[i] -=1;
-                    indxs[i-1] +=1;
-                }
+            unsigned index = indxs.size()-1;
+            ++indxs[index];
+
+            while(indxs[index]==widths[index] && index>0) {
+                indxs[index]=0;
+
+                --index;
+                ++indxs[index];
             }
+
             return *ptr;
         }
 
