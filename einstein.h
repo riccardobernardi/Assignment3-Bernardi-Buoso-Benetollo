@@ -178,19 +178,18 @@ public:
                 x.next();
             }
         }else{
-            int span = strides[0]*widths[0]/N; //number of cells for every thread
-            for(int i = 0; i<N; i++){
-                int tpos = i*span;
+            int counter = 1;
+            for(auto w : widths){
+                counter  *= w;
+            }
+            int span = counter / N; //number of cells for every thread
+            for(int i = 0; i < N; ++i){
                 // we assume a "correct" number of threads
-                for(int j = widths.size(); j>=0;--j){
-                    thread_indxs[i][j] = tpos%widths[j];
-                    tpos = tpos/widths[j];
-                }
+
                 // thread_indxs[i]
                 threads.push_back(std::thread([=](){
-                    printf("ciao sono il thread %d", i);
-                    for(int k = 0; k< span; k++) {
-                        teval(thread_indxs[i], i*span+k) += x.teval(thread_indxs[i], i*span+k);
+                    for(int j = 0; j < span; ++j) {
+                        teval(i * span + j) += x.teval(i * span + j);
                     };
                 }));
                 threads[i].join();
@@ -261,7 +260,7 @@ protected:
 
     T& eval() { return *current_ptr; }
 
-    T& teval(std::vector<size_t> indxs, int plus) const {
+    T& teval(int plus) const {
         T* ptr = start_ptr;
         ptr+=plus;
         return *ptr;
@@ -301,7 +300,6 @@ protected:
     std::vector<size_t> strides;
     std::vector<size_t> idxs;
     size_t N=2;
-    std::vector<std::vector<size_t>> thread_indxs = std::vector<std::vector<size_t>>(N);
 
     T* const start_ptr;
     T* current_ptr;
@@ -405,8 +403,8 @@ protected:
     }
 
     T eval() { return exp1.eval() * exp2.eval(); }
-    T teval(std::vector<size_t> indxs, int plus) const {
-        return exp1.teval(indxs, plus) * exp2.teval(indxs, plus);
+    T teval(int plus) const {
+        return exp1.teval(plus) * exp2.teval(plus);
     }
 
     std::map<Index,index_data>& get_index_map() { return index_map; }
@@ -583,8 +581,8 @@ public:
 protected:
 
     T eval() { return exp1.eval() + exp2.eval(); }
-    T teval(std::vector<size_t> indxs, int plus) const {
-        return exp1.teval(indxs, plus) + exp2.teval(indxs, plus);
+    T teval(int plus) const {
+        return exp1.teval(plus) + exp2.teval(plus);
     }
 };
 
@@ -611,8 +609,8 @@ public:
 protected:
 
     T eval() { return exp1.eval() - exp2.eval(); }
-    T teval(std::vector<size_t> indxs, int plus) const {
-        return exp1.teval(indxs, plus) - exp2.teval(indxs, plus);
+    T teval(int plus) const {
+        return exp1.teval(plus) - exp2.teval(plus);
     }
 };
 
