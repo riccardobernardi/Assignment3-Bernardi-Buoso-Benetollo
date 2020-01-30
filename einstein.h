@@ -310,7 +310,7 @@ protected:
     std::vector<size_t> widths;
     std::vector<size_t> strides;
     std::vector<size_t> idxs;
-    size_t N=2;
+    size_t N=4;
     std::vector<std::vector<size_t>> thread_indxs = std::vector<std::vector<size_t>>(N);
 
     T* const start_ptr;
