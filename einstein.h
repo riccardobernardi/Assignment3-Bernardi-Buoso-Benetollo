@@ -178,17 +178,23 @@ public:
                 x.next();
             }
         }else{
-            int span = strides[0]*widths[0]/N; //number of cells for every thread
+            size_t counter = 1;
+            for(int i=0; i<widths.size();++i){
+                counter*=widths.at(i);
+            }
+            int span = counter/N; //number of cells for every thread
             for(int i = 0; i<N; i++){
                 int tpos = i*span;
                 // we assume a "correct" number of threads
-                for(int j = widths.size(); j>=0;--j){
-                    thread_indxs[i][j] = tpos%widths[j];
-                    tpos = tpos/widths[j];
+                thread_indxs.at(i) = std::vector<size_t>(widths.size());
+                for(int j = widths.size()-1; j>=0;--j){
+                    //std::cout << i << j << std::endl;
+                    thread_indxs.at(i).at(j) = tpos%widths.at(j);
+                    tpos = tpos/widths.at(j);
                 }
                 // thread_indxs[i]
                 threads.push_back(std::thread([=](){
-                    std::cout << "ciao sono il thread" << i << std::endl;
+                    //std::cout << "ciao sono il thread" << i << std::endl;
                     for(int k = 0; k< span; k++) {
                         teval(thread_indxs[i]) += x.teval(thread_indxs[i]);
                     };
@@ -262,13 +268,13 @@ protected:
     T& eval() { return *current_ptr; }
 
     T& teval(std::vector<size_t> indxs) const {
-        T* ptr = start_ptr;
-        for(int i=indxs.size(); i>=0; --i){
-            ptr +=indxs[i]*strides[i];
+        auto ptr = start_ptr;
+        for(int i=indxs.size()-1; i>=0; --i){
+            ptr += indxs[i]*strides[i];
         }
 
         indxs[widths.size() - 1] += 1;
-        for(int i=widths.size(); i>=0; --i ){
+        for(int i=widths.size()-1; i>=0; --i ){
             if(indxs[i] > widths[i]){
                 indxs[i] -=1;
                 indxs[i-1] +=1;
@@ -312,6 +318,7 @@ protected:
     std::vector<size_t> idxs;
     size_t N=2;
     std::vector<std::vector<size_t>> thread_indxs = std::vector<std::vector<size_t>>(N);
+
 
     T* const start_ptr;
     T* current_ptr;
@@ -643,9 +650,9 @@ public:
     einstein_expression<T,Index_Set<ids...>,einstein_proxy>& operator =(einstein_expression<T2,Index_Set<ids2...>,TYPE2>&& x) {
         static_assert(is_same_nonrepeat<Index_Set<ids...>,typename non_repeat<Index_Set<ids...>>::set>::value, "Repeated indices in lvalue Einstein expression");
         static_assert(is_same_nonrepeat<Index_Set<ids...>, typename non_repeat<Index_Set<ids2...>>::set>::value, "Non-repeated indices in lvalue and rvalue Einstein expressions are not the same");
-        std::cout << "Qui non funziona:)" << std::endl;
+        //std::cout << "Qui non funziona:)" << std::endl;
         einstein_expression<T,dynamic,einstein_proxy>::operator = (static_cast<einstein_expression<T2,dynamic,TYPE2>&&>(x));
-        std::cout << "Qui non funziona:)" << std::endl;
+        //std::cout << "Qui non funziona:)" << std::endl;
         return *this;
     }
 };
