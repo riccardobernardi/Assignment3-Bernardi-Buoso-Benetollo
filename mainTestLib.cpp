@@ -112,6 +112,10 @@ void test8(){
     for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
         std::cout << *iter << ' ';
     std::cout << '\n';
+
+    for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
+        std::cout << *iter << ' ';
+    std::cout << '\n';
 }
 
 void test9(){
@@ -125,6 +129,15 @@ void test9(){
     std::cout << '\n';
 
     tensor<int> t3(2,2,2), t4(2);
+    auto i=new_index;
+    auto j=new_index;
+
+    auto k=new_index;
+    count=0;
+    for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
+        *iter = count++;
+
+    t4(i) = t3(i,j,k)*t1(j,k)+t3(i,k,k);
 
     for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
         std::cout << *iter << ' ';
@@ -230,5 +243,5 @@ int main(){
     a.add(test12, "test12");
     a.add(test13, "test13");
 
-    a.launch_test(-1);
+    a.launch_test(9);
 }
