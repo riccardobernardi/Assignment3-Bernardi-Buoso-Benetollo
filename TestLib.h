@@ -8,7 +8,6 @@
 #include <functional>
 #include <vector>
 #include <iostream>
-#include <zconf.h>
 
 /*void test(const std::function<void()>& callback, const std::string& name, int number){
     pid_t pid = fork();
