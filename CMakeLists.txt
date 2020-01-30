@@ -3,4 +3,4 @@ project(Assignment3_Bernardi_Buoso_Benetollo)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(Assignment3_Bernardi_Buoso_Benetollo einstein.cc)
+add_executable(Assignment3_Bernardi_Buoso_Benetollo mainTestLib.cpp)
