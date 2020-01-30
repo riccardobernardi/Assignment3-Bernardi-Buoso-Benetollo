@@ -89,8 +89,19 @@ void test7(){
     std::cout << '\n';
 }
 
+void test8(){
+    tensor<int,rank<2>> t1(2,2), t2(2,2);
 
-/*void test8(){
+    int count=0;
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = count++;
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        std::cout << *iter << ' ';
+    std::cout << '\n';
+
+    auto i=new_index;
+    auto j=new_index;
+
     tensor<int> t3(2,2,2), t4(2);
     auto k=new_index;
     count=0;
@@ -101,34 +112,110 @@ void test7(){
     for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
         std::cout << *iter << ' ';
     std::cout << '\n';
-    for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
+}
+
+void test9(){
+    tensor<int,rank<2>> t1(2,2), t2(2,2);
+
+    int count=0;
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = count++;
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
         std::cout << *iter << ' ';
     std::cout << '\n';
 
+    auto i=new_index;
+    auto j=new_index;
 
+    tensor<int> t3(2,2,2), t4(2);
+    auto k=new_index;
+
+    for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
+        std::cout << *iter << ' ';
+    std::cout << '\n';
+}
+
+void test10(){
+    tensor<int,rank<2>> t1(2,2), t2(2,2);
+
+    int count=0;
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = count++;
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        std::cout << *iter << ' ';
+    std::cout << '\n';
+
+    auto i=new_index;
+    auto j=new_index;
+    auto k=new_index;
 
     t2(i,j) = t1(i,k)*t1(k,j);
     for(auto iter=t2.begin(); iter!=t2.end(); ++iter)
         std::cout << *iter << ' ';
     std::cout << '\n';
+}
 
+void test11(){
+    tensor<int,rank<2>> t1(2,2), t2(2,2);
 
+    int count=0;
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = count++;
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        std::cout << *iter << ' ';
+    std::cout << '\n';
+
+    auto i=new_index;
+    auto j=new_index;
+    auto k=new_index;
+
+    tensor<int> t3(2,2,2), t4(2);
     t2(i,k) = t3(i,j,j)*t4(k);
     for(auto iter=t2.begin(); iter!=t2.end(); ++iter)
         std::cout << *iter << ' ';
     std::cout << '\n';
+}
+
+void test12(){
+    tensor<int,rank<2>> t1(2,2), t2(2,2);
+
+    int count=0;
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = count++;
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        std::cout << *iter << ' ';
+    std::cout << '\n';
+
+    auto i=new_index;
+    auto j=new_index;
+    auto k=new_index;
 
     tensor<int,rank<2>> t5=t1(i,j);
     for(auto iter=t5.begin(); iter!=t5.end(); ++iter)
         std::cout << *iter << ' ';
     std::cout << '\n';
+}
 
+void test13(){
+    tensor<int,rank<2>> t1(2,2), t2(2,2);
+
+    int count=0;
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = count++;
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        std::cout << *iter << ' ';
+    std::cout << '\n';
+
+    auto i=new_index;
+    auto j=new_index;
+    auto k=new_index;
+
+    tensor<int> t3(2,2,2), t4(2);
     tensor<int,rank<2>> t6=t3(i,j,k)*t4(j);
     for(auto iter=t6.begin(); iter!=t6.end(); ++iter)
         std::cout << *iter << ' ';
     std::cout << '\n';
-}*/
-
+}
 
 
 int main(){
@@ -140,5 +227,12 @@ int main(){
     a.add(test5, "test5");
     a.add(test6, "test6");
     a.add(test7, "test7");
+    a.add(test8, "test8");
+    a.add(test9, "test9");
+    a.add(test10, "test10");
+    a.add(test11, "test11");
+    a.add(test12, "test12");
+    a.add(test13, "test13");
+
     a.launch_test(-1);
 }
