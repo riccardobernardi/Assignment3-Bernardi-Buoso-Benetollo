@@ -41,16 +41,21 @@ int main() {
                 std::cout << *iter << ' ';
     std::cout << '\n';
 
+    std::cout << "Qui funziona:)" << std::endl;
+
 
     auto i=new_index;
     auto j=new_index;
 
     t2(j,i) = t1(i,j);
 
+    std::cout << "Qui non funziona:)" << std::endl;
+
 
     for(auto iter=t2.begin(); iter!=t2.end(); ++iter)
                 std::cout << *iter << ' ';
     std::cout << '\n';
+    std::cout << "Qui non funziona:)" << std::endl;
 
     tensor<int> t3(2,2,2), t4(2);
      auto k=new_index;

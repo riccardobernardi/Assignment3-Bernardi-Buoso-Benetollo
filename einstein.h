@@ -188,7 +188,7 @@ public:
                 }
                 // thread_indxs[i]
                 threads.push_back(std::thread([=](){
-                    printf("ciao sono il thread %d", i);
+                    std::cout << "ciao sono il thread" << i << std::endl;
                     for(int k = 0; k< span; k++) {
                         teval(thread_indxs[i]) += x.teval(thread_indxs[i]);
                     };
@@ -310,7 +310,7 @@ protected:
     std::vector<size_t> widths;
     std::vector<size_t> strides;
     std::vector<size_t> idxs;
-    size_t N=4;
+    size_t N=2;
     std::vector<std::vector<size_t>> thread_indxs = std::vector<std::vector<size_t>>(N);
 
     T* const start_ptr;
@@ -643,7 +643,9 @@ public:
     einstein_expression<T,Index_Set<ids...>,einstein_proxy>& operator =(einstein_expression<T2,Index_Set<ids2...>,TYPE2>&& x) {
         static_assert(is_same_nonrepeat<Index_Set<ids...>,typename non_repeat<Index_Set<ids...>>::set>::value, "Repeated indices in lvalue Einstein expression");
         static_assert(is_same_nonrepeat<Index_Set<ids...>, typename non_repeat<Index_Set<ids2...>>::set>::value, "Non-repeated indices in lvalue and rvalue Einstein expressions are not the same");
+        std::cout << "Qui non funziona:)" << std::endl;
         einstein_expression<T,dynamic,einstein_proxy>::operator = (static_cast<einstein_expression<T2,dynamic,TYPE2>&&>(x));
+        std::cout << "Qui non funziona:)" << std::endl;
         return *this;
     }
 };
