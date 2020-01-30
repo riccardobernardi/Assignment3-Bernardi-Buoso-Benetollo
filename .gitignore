@@ -37,3 +37,5 @@ cmake-build-debug/Makefile
 .idea
 CMakeLists.txt
 *.o
+*.o
+cmake-build-debug/CMakeFiles/Assignment3_Bernardi_Buoso_Benetollo.dir/mainTestLib.cpp.o
