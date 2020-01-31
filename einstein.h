@@ -10,6 +10,8 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
 #define char_index(symb) CIndex<(#symb)[0]>()
 */
 
+void set_thread()
+
 
 //struct holding dynamic info about index (using an unsigned to guarantee as many indices as we want)
     struct Index {
@@ -442,8 +444,9 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
             for (auto i=index_map.begin(); i!=index_map.end(); ++i) {
                 if(!(i->second.repeated)) widths.push_back(i->second.width);
             }
+            std::cout << strides.size() << " " << widths.size() << std::endl;
             strides.resize(widths.size());
-            strides[widths.size()-1]=1;
+            strides.at(widths.size()-1)=1;
             for (int i=widths.size()-1; i!=0; --i) {
                 strides[i-1]=strides[i]*widths[i];
             }
