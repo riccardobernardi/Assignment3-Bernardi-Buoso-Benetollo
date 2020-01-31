@@ -12,8 +12,19 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
 
 int N = 1;
 
-void set_thread(int N2=1){
-    N = N2;
+void set_thread(size_t n_threads = 1){
+    unsigned int max_n = std::thread::hardware_concurrency();
+
+    if(max_n == 0 or n_threads == 0){
+        N = 1;
+    }
+    else if(n_threads <= max_n){
+        N = n_threads;
+    }
+    else{
+        std::cout << "Number of threads reduced to the maximum supported by the machine: " << max_n << std::endl;
+        N = max_n;
+    }
 }
 
 
@@ -187,11 +198,17 @@ void set_thread(int N2=1){
                 for(auto w = widths.begin(); w != widths.end(); ++w){
                     counter *= (*w);
                 }
-                int span = counter / N; //number of cells for every thread
 
+                std::vector<int> span = std::vector<int>(N, counter / N); //number of jobs for each thread
+                int tmp = counter % N;
+
+                while(tmp > 0){         //if counter % N > 0 some threads will has more jobs then others
+                    ++span[tmp - 1];
+                    --tmp;
+                }
+                int tpos = 0, old = 0; //using old position to maintain tpos value, since tpos is modified in next loop
                 for(int i = 0; i < N; ++i){
-                    int tpos = i*span;
-                    // we assume a "correct" number of threads
+                    old = tpos;
 
                     thread_indxs.at(i) = std::vector<size_t>(widths.size());
                     for(int j = widths.size()-1; j >= 0; --j){
@@ -213,7 +230,9 @@ void set_thread(int N2=1){
                                 ++indxs[index];
                             }
                         }
-                    }), span, thread_indxs[i]);
+                    }), span[i], thread_indxs[i]);
+
+                    tpos = old + span[i];
                 }
 
                 for(auto t = threads.begin(); t != threads.end(); ++t){
