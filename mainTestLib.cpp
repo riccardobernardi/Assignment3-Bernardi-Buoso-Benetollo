@@ -266,5 +266,5 @@ int main(){
     a.add(test13, "test13");
     a.add(test14, "test14");
 
-    a.launch_test(7);
+    a.launch_test(-1);
 }
