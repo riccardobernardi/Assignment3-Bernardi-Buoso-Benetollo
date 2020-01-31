@@ -12,7 +12,7 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
 
 int N = 1;
 
-void set_thread(int N2){
+void set_thread(int N2=1){
     N = N2;
 }
 

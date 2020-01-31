@@ -293,7 +293,7 @@ void test_simple_mult_222_2(){
     std::cout << '\n';
 }
 
-void test_very_long_mult(){
+/*void test_very_long_mult(){
     tensor<int,rank<2>> t1(2,2), t2(2,2);
 
     int count=0;
@@ -311,7 +311,7 @@ void test_very_long_mult(){
     for(auto iter=t6.begin(); iter!=t6.end(); ++iter)
         std::cout << *iter << ' ';
     std::cout << '\n';
-}
+}*/
 
 
 int main(){
@@ -330,7 +330,7 @@ int main(){
     a.add(test_mult_all_ranked, "test11");
     a.add(test_simple_assignment, "test_simple_assignment");
     a.add(test_simple_mult_222_2, "test_simple_mult_222_2");
-    a.add(test_very_long_mult, "test_very_long_mult");
+    // a.add(test_very_long_mult, "test_very_long_mult");
 
     a.launch_test(-1);
 }
