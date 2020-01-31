@@ -9,11 +9,14 @@
 
 using namespace Tensor;
 
+int threads = 4;
+
 std::ostream & operator << (std::ostream& out, Index_Set<>) { return out; }
 template<unsigned id, unsigned... ids>
 std::ostream & operator << (std::ostream& out, Index_Set<id, ids...>) {
     return out << id << ' ' << Index_Set<ids...>();
 }
+
 
 void test_indexlib(){
     //a bit of fun with the Index_Set library ;)
@@ -56,7 +59,7 @@ void test_iter_tensor(){
     std::cout << '\n';
 }
 
-void test_invert_matrixes(){
+void test_invert_matrixes_1_thread(){
     tensor<int,rank<2>> t1(2,2), t2(2,2);
 
     int count=0;
@@ -77,7 +80,63 @@ void test_invert_matrixes(){
     std::cout << '\n';
 }
 
-void test_sum_mult_op(){
+void test_invert_matrixes_n_threadss(){
+    set_thread(threads);
+    tensor<int,rank<2>> t1(2,2), t2(2,2);
+
+    int count=0;
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = count++;
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        std::cout << *iter << ' ';
+    std::cout << '\n';
+
+    auto i=new_index;
+    auto j=new_index;
+
+    t2(j,i) = t1(i,j);
+
+    std::cout << "here the result of [t2(j,i) = t1(i,j)];" << std::endl;
+    for(auto iter=t2.begin(); iter!=t2.end(); ++iter)
+        std::cout << *iter << ' ';
+    std::cout << '\n';
+}
+
+void test_sum_mult_op_1_threads(){
+    set_thread();
+    tensor<int,rank<2>> t1(2,2);
+    tensor<int> t3(2,2,2), t4(2);
+
+    int count=0;
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = count++;
+    count=0;
+    for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
+        *iter = count++;
+
+
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        std::cout << *iter << ' ';
+    std::cout << '\n';
+
+    for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
+        std::cout << *iter << ' ';
+    std::cout << '\n';
+
+    auto i=new_index;
+    auto j=new_index;
+    auto k=new_index;
+
+    t4(i) = t3(i,j,k)*t1(j,k)+t3(i,k,k);
+
+    std::cout << "here the result of [t4(i) = t3(i,j,k)*t1(j,k)+t3(i,k,k)];" << std::endl;
+    for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
+        std::cout << *iter << ' ';
+    std::cout << '\n';
+}
+
+void test_sum_mult_op_n_threadss(){
+    set_thread(threads);
     tensor<int,rank<2>> t1(2,2);
     tensor<int> t3(2,2,2), t4(2);
 
@@ -141,7 +200,8 @@ void test_sum_mult_op(){
     std::cout << '\n';
 }*/
 
-void test_sum_2244_2442(){
+void test_sum_2244_2442_1_thread(){
+    set_thread();
     tensor<int> t1(2,2), t3(2,2,4,4), t4(2,4,4,2);
 
     int count=0;
@@ -163,7 +223,31 @@ void test_sum_2244_2442(){
     std::cout << '\n';
 }
 
-void test_sum_2244_2442_smaller(){
+void test_sum_2244_2442_n_threads(){
+    set_thread(threads);
+    tensor<int> t1(2,2), t3(2,2,4,4), t4(2,4,4,2);
+
+    int count=0;
+    for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
+        *iter = count++;
+    count=0;
+    for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
+        *iter = count++;
+
+    auto i=new_index;
+    auto j=new_index;
+    auto k=new_index;
+
+    t1(i,j) = t3(i,j,k,k)+t4(i,k,k,j);
+
+    std::cout << "here the result of [t1(i,j) = t3(i,j,k,k)+t4(i,k,k,j)];" << std::endl;
+    for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
+        std::cout << *iter << ' ';
+    std::cout << '\n';
+}
+
+void test_sum_2244_2442_smaller_1_thread(){
+    set_thread();
     tensor<int> t1(2,2), t3(2,2,3,3), t4(2,3,3,2);
 
     int count=0;
@@ -185,7 +269,31 @@ void test_sum_2244_2442_smaller(){
     std::cout << '\n';
 }
 
-void test10(){
+void test_sum_2244_2442_smaller_n_threads(){
+    set_thread(threads);
+    tensor<int> t1(2,2), t3(2,2,3,3), t4(2,3,3,2);
+
+    int count=0;
+    for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
+        *iter = count++;
+    count=0;
+    for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
+        *iter = count++;
+
+    auto i=new_index;
+    auto j=new_index;
+    auto k=new_index;
+
+    t1(i,j) = t3(i,j,k,k)+t4(i,k,k,j);
+
+    std::cout << "here the result of [t1(i,j) = t3(i,j,k,k)+t4(i,k,k,j)];" << std::endl;
+    for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
+        std::cout << *iter << ' ';
+    std::cout << '\n';
+}
+
+void test_invert_indexes_mult_1_thread(){
+    set_thread();
     tensor<int,rank<2>> t1(2,2), t2(2,2);
 
     int count=0;
@@ -204,8 +312,28 @@ void test10(){
     std::cout << '\n';
 }
 
-void test_mult_all_ranked(){
-    set_thread(4);
+void test_invert_indexes_mult_n_threads(){
+    set_thread(threads);
+    tensor<int,rank<2>> t1(2,2), t2(2,2);
+
+    int count=0;
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = count++;
+
+    auto i=new_index;
+    auto j=new_index;
+    auto k=new_index;
+
+    t2(i,j) = t1(i,k)*t1(k,j);
+
+    std::cout << "here the result of [t2(i,j) = t1(i,k)*t1(k,j)];" << std::endl;
+    for(auto iter=t2.begin(); iter!=t2.end(); ++iter)
+        std::cout << *iter << ' ';
+    std::cout << '\n';
+}
+
+void test_mult_all_ranked_1_thread(){
+    set_thread();
     tensor<int,rank<2>> t2(2,2);
     tensor<int,rank<3>> t3(2,2,2);
     tensor<int,rank<1>> t4(2);
@@ -229,7 +357,32 @@ void test_mult_all_ranked(){
     std::cout << '\n';
 }
 
-/*void test_mult_all_ranked(){
+void test_mult_all_ranked_n_threads(){
+    set_thread(threads);
+    tensor<int,rank<2>> t2(2,2);
+    tensor<int,rank<3>> t3(2,2,2);
+    tensor<int,rank<1>> t4(2);
+
+    int count=0;
+    for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
+        *iter = count++;
+    count=0;
+    for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
+        *iter = count++;
+
+    auto i=new_index;
+    auto j=new_index;
+    auto k=new_index;
+
+    t2(i,k) = t3(i,j,j)*t4(k);
+
+    std::cout << "here the result of [t2(i,k) = t3(i,j,j)*t4(k)];" << std::endl;
+    for(auto iter=t2.begin(); iter!=t2.end(); ++iter)
+        std::cout << *iter << ' ';
+    std::cout << '\n';
+}
+
+/*void test_mult_all_ranked_1_thread(){
     tensor<int,rank<2>,thread<2>> t2(2,2);
     tensor<int,rank<3>> t3(2,2,2);
     tensor<int,rank<1>> t4(2);
@@ -253,7 +406,8 @@ void test_mult_all_ranked(){
     std::cout << '\n';
 }*/
 
-void test_simple_assignment(){
+void test_simple_assignment_1_thread(){
+    set_thread();
     tensor<int,rank<2>> t1(2,2), t2(2,2);
     tensor<int> t5(2,2); // if it was tensor<int,rank<2>> it was wrong, why? // because it have to be assigned in that moment
 
@@ -271,8 +425,49 @@ void test_simple_assignment(){
     std::cout << '\n';
 }
 
-void test_simple_mult_222_2(){
-    set_thread(2);
+void test_simple_assignment_n_threads(){
+    set_thread(threads);
+    tensor<int,rank<2>> t1(2,2), t2(2,2);
+    tensor<int> t5(2,2); // if it was tensor<int,rank<2>> it was wrong, why? // because it have to be assigned in that moment
+
+    int count=0;
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = count++;
+
+    auto i=new_index;
+    auto j=new_index;
+
+    t5 = t1(i,j);
+    std::cout << "here the result of [t5=t1(i,j)];" << std::endl;
+    for(auto iter=t5.begin(); iter!=t5.end(); ++iter)
+        std::cout << *iter << ' ';
+    std::cout << '\n';
+}
+
+void test_simple_mult_222_2_1_thread(){
+    set_thread();
+    tensor<int> t3(2,2,2), t4(2);
+
+    int count=0;
+    for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
+        *iter = count++;
+    count=0;
+    for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
+        *iter = count++;
+
+    auto i=new_index;
+    auto j=new_index;
+    auto k=new_index;
+
+    tensor<int,rank<2>> t6=t3(i,j,k)*t4(j);
+    std::cout << "here the result of [t6=t3(i,j,k)*t4(j)];" << std::endl;
+    for(auto iter=t6.begin(); iter!=t6.end(); ++iter)
+        std::cout << *iter << ' ';
+    std::cout << '\n';
+}
+
+void test_simple_mult_222_2_n_threads(){
+    set_thread(threads);
     tensor<int> t3(2,2,2), t4(2);
 
     int count=0;
@@ -314,22 +509,71 @@ void test_simple_mult_222_2(){
 }*/
 
 
+void test_mega_sum_1_threads(){
+    set_thread();
+    tensor<int,rank<4>> t1(2,2,8,10);
+    tensor<int,rank<4>> t3(2,2,8,9);
+
+    int count=0;
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = count++;
+    count=0;
+    for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
+        *iter = count++;
+
+    auto i=new_index;
+    auto j=new_index;
+    auto k=new_index;
+
+    tensor<int> t4 = t3(i,j,k,k)+t1(i,j,k,k);
+}
+
+void test_mega_sum_n_threads(){
+    set_thread(threads);
+    tensor<int,rank<4>> t1(2,2,8,10);
+    tensor<int,rank<4>> t3(2,2,8,9);
+
+    int count=0;
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = count++;
+    count=0;
+    for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
+        *iter = count++;
+
+    auto i=new_index;
+    auto j=new_index;
+    auto k=new_index;
+
+    tensor<int> t4 = t3(i,j,k,k)+t1(i,j,k,k);
+}
+
+
 int main(){
     Test a{};
     a.add(test_indexlib, "test_indexlib");
     a.add(test_nonrepeat, "test_nonrepeat");
-    a.add(test_sum_2244_2442, "test_sum_2244_2442");
+    a.add(test_sum_2244_2442_1_thread, "test_sum_2244_2442_1_thread");
+    a.add(test_sum_2244_2442_n_threads,"test_sum_2244_2442_n_threads");
     a.add(test_diff, "test_diff");
     a.add(test_merge, "test_merge");
     a.add(test_iter_tensor, "test_iter_tensor");
-    a.add(test_invert_matrixes, "test_invert_matrixes");
-    a.add(test_sum_mult_op, "test_sum_mult_op");
+    a.add(test_invert_matrixes_1_thread, "test_invert_matrixes_1_thread");
+    a.add(test_invert_matrixes_n_threadss,"test_invert_matrixes_n_threadss");
+    a.add(test_sum_mult_op_1_threads, "test_sum_mult_op_1_threads");
+    a.add(test_sum_mult_op_n_threadss,"test_sum_mult_op_n_threadss");
     // a.add(test_subtract_mult_op, "test_subtract_mult_op");
-    a.add(test10, "test10");
-    a.add(test_sum_2244_2442_smaller, "test_sum_2244_2442_smaller");
-    a.add(test_mult_all_ranked, "test11");
-    a.add(test_simple_assignment, "test_simple_assignment");
-    a.add(test_simple_mult_222_2, "test_simple_mult_222_2");
+    a.add(test_invert_indexes_mult_1_thread, "test_invert_indexes_mult_1_thread");
+    a.add(test_invert_indexes_mult_n_threads,"test_invert_indexes_mult_n_threads");
+    a.add(test_sum_2244_2442_smaller_1_thread, "test_sum_2244_2442_smaller_1_thread");
+    a.add(test_sum_2244_2442_smaller_n_threads,"test_sum_2244_2442_smaller_n_threads");
+    a.add(test_mult_all_ranked_1_thread, "test_mult_all_ranked_1_thread");
+    a.add(test_mult_all_ranked_n_threads,"test_mult_all_ranked_n_threads");
+    a.add(test_simple_assignment_1_thread, "test_simple_assignment_1_thread");
+    a.add(test_simple_assignment_n_threads,"test_simple_assignment_n_threads");
+    a.add(test_simple_mult_222_2_1_thread, "test_simple_mult_222_2_1_thread");
+    a.add(test_simple_mult_222_2_n_threads,"test_simple_mult_222_2_n_threads");
+    a.add(test_mega_sum_1_threads,"test_mega_sum_1_threads");
+    a.add(test_mega_sum_n_threads,"test_mega_sum_n_threads");
     // a.add(test_very_long_mult, "test_very_long_mult");
 
     a.launch_test(-1);
