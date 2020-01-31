@@ -418,30 +418,6 @@ void test_mult_all_ranked_n_threads(){
     std::cout << '\n';
 }
 
-/*void test_mult_all_ranked_1_thread(){
-    tensor<int,rank<2>,thread<2>> t2(2,2);
-    tensor<int,rank<3>> t3(2,2,2);
-    tensor<int,rank<1>> t4(2);
-
-    int count=0;
-    for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
-        *iter = count++;
-    count=0;
-    for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
-        *iter = count++;
-
-    auto i=new_index;
-    auto j=new_index;
-    auto k=new_index;
-
-    t2(i,k) = t3(i,j,j)*t4(k);
-
-    std::cout << "here the result of [t2(i,k) = t3(i,j,j)*t4(k)];" << std::endl;
-    for(auto iter=t2.begin(); iter!=t2.end(); ++iter)
-        std::cout << *iter << ' ';
-    std::cout << '\n';
-}*/
-
 void test_simple_assignment_1_thread(){
     set_thread();
     tensor<int,rank<2>> t1(2,2), t2(2,2);
