@@ -206,8 +206,8 @@ void set_thread(int N2){
                             unsigned index = indxs.size()-1;
                             ++indxs[index];
 
-                            while(indxs[index]==widths[index] && index>0) {
-                                indxs[index]=0;
+                            while(indxs[index] == widths[index] && index>0) {
+                                indxs[index] = 0;
 
                                 --index;
                                 ++indxs[index];
@@ -287,8 +287,9 @@ void set_thread(int N2){
 
         T& teval(std::vector<size_t> indxs) const {
             auto ptr = start_ptr;
-            for(int i=indxs.size()-1; i>=0; --i){
-                ptr += indxs[i]*strides[i];
+
+            for(int i = indxs.size() - 1; i >= 0; --i){
+                ptr += indxs[i] * strides[i];
             }
 
             return *ptr;
@@ -433,6 +434,7 @@ void set_thread(int N2){
         }
 
         T eval() { return exp1.eval() * exp2.eval(); }
+
         T teval(std::vector<size_t> indxs) const {
             return exp1.teval(indxs) * exp2.teval(indxs);
         }
@@ -612,6 +614,7 @@ void set_thread(int N2){
     protected:
 
         T eval() { return exp1.eval() + exp2.eval(); }
+
         T teval(std::vector<size_t> indxs) const {
             return exp1.teval(indxs) + exp2.teval(indxs);
         }
@@ -640,6 +643,7 @@ void set_thread(int N2){
     protected:
 
         T eval() { return exp1.eval() - exp2.eval(); }
+
         T teval(std::vector<size_t> indxs) const {
             return exp1.teval(indxs) - exp2.teval(indxs);
         }
