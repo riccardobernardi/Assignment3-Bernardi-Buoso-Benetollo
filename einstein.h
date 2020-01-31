@@ -201,8 +201,8 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
                             unsigned index = indxs.size()-1;
                             ++indxs[index];
 
-                            while(indxs[index]==widths[index] && index>0) {
-                                indxs[index]=0;
+                            while(indxs[index] == widths[index] && index>0) {
+                                indxs[index] = 0;
 
                                 --index;
                                 ++indxs[index];
@@ -282,8 +282,9 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
 
         T& teval(std::vector<size_t> indxs) const {
             auto ptr = start_ptr;
-            for(int i=indxs.size()-1; i>=0; --i){
-                ptr += indxs[i]*strides[i];
+
+            for(int i = indxs.size() - 1; i >= 0; --i){
+                ptr += indxs[i] * strides[i];
             }
 
             return *ptr;
@@ -322,8 +323,8 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
         std::vector<size_t> widths;
         std::vector<size_t> strides;
         std::vector<size_t> idxs;
-        size_t N=4;
-        std::vector<std::vector<size_t>> thread_indxs = std::vector<std::vector<size_t>>(N);
+        size_t N = 1;         //number pf threads
+        std::vector<std::vector<size_t>> thread_indxs = std::vector<std::vector<size_t>>(N);    //vector containing indexes for each thread
 
 
         T* const start_ptr;
@@ -428,6 +429,7 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
         }
 
         T eval() { return exp1.eval() * exp2.eval(); }
+
         T teval(std::vector<size_t> indxs) const {
             return exp1.teval(indxs) * exp2.teval(indxs);
         }
@@ -606,6 +608,7 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
     protected:
 
         T eval() { return exp1.eval() + exp2.eval(); }
+
         T teval(std::vector<size_t> indxs) const {
             return exp1.teval(indxs) + exp2.teval(indxs);
         }
@@ -634,6 +637,7 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
     protected:
 
         T eval() { return exp1.eval() - exp2.eval(); }
+
         T teval(std::vector<size_t> indxs) const {
             return exp1.teval(indxs) - exp2.teval(indxs);
         }
