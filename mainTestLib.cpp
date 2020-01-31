@@ -109,9 +109,9 @@ void test_sum_mult_op(){
     std::cout << '\n';
 }
 
-/*void test_subtract_mult_op(){
+void test_subtract_mult_op(){
     tensor<int,rank<2>> t1(2,2);
-    tensor<int> t3(2,2,2), t4(2);
+    tensor<int> t3(2,2,2);
 
     int count=0;
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
@@ -133,13 +133,13 @@ void test_sum_mult_op(){
     auto j=new_index;
     auto k=new_index;
 
-    t4(i) = t3(i,j,k)*t1(j,k)-t3(i,k,k);
+    tensor<int> t4 = t1(j)-t3(i,k,k);
 
     std::cout << "here the result of [t4(i) = t3(i,j,k)*t1(j,k)+t3(i,k,k)];" << std::endl;
     for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
         std::cout << *iter << ' ';
     std::cout << '\n';
-}*/
+}
 
 void test_sum_2244_2442(){
     tensor<int> t1(2,2), t3(2,2,4,4), t4(2,4,4,2);
@@ -157,7 +157,29 @@ void test_sum_2244_2442(){
 
     t1(i,j) = t3(i,j,k,k)+t4(i,k,k,j);
 
-    std::cout << "here the result of [t4(i) = t3(i,j,k)*t1(j,k)+t3(i,k,k)];" << std::endl;
+    std::cout << "here the result of [t1(i,j) = t3(i,j,k,k)+t4(i,k,k,j)];" << std::endl;
+    for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
+        std::cout << *iter << ' ';
+    std::cout << '\n';
+}
+
+void test_sum_2244_2442_smaller(){
+    tensor<int> t1(2,2), t3(2,2,3,3), t4(2,3,3,2);
+
+    int count=0;
+    for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
+        *iter = count++;
+    count=0;
+    for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
+        *iter = count++;
+
+    auto i=new_index;
+    auto j=new_index;
+    auto k=new_index;
+
+    t1(i,j) = t3(i,j,k,k)+t4(i,k,k,j);
+
+    std::cout << "here the result of [t1(i,j) = t3(i,j,k,k)+t4(i,k,k,j)];" << std::endl;
     for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
         std::cout << *iter << ' ';
     std::cout << '\n';
@@ -269,7 +291,7 @@ void test_simple_mult_222_2(){
     std::cout << '\n';
 }
 
-/*void test_very_long_mult(){
+void test_very_long_mult(){
     tensor<int,rank<2>> t1(2,2), t2(2,2);
 
     int count=0;
@@ -282,12 +304,12 @@ void test_simple_mult_222_2(){
     auto i=new_index;
     auto j=new_index;
 
-    tensor<int> t6=t1(i,i)*t2(j,j);
+    tensor<int> t6=t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i);
     std::cout << "here the result of [t6=t1(i,i)*t2(j,j)];" << std::endl;
     for(auto iter=t6.begin(); iter!=t6.end(); ++iter)
         std::cout << *iter << ' ';
     std::cout << '\n';
-}*/
+}
 
 
 int main(){
@@ -302,10 +324,11 @@ int main(){
     a.add(test_sum_mult_op, "test_sum_mult_op");
     // a.add(test_subtract_mult_op, "test_subtract_mult_op");
     a.add(test10, "test10");
+    a.add(test_sum_2244_2442_smaller, "test_sum_2244_2442_smaller");
     a.add(test_mult_all_ranked, "test11");
     a.add(test_simple_assignment, "test_simple_assignment");
     a.add(test_simple_mult_222_2, "test_simple_mult_222_2");
-    // a.add(test_very_long_mult, "test_very_long_mult");
+    a.add(test_very_long_mult, "test_very_long_mult");
 
-    a.launch_test(-1);
+    a.launch_test(14);
 }
