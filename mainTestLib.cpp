@@ -9,7 +9,7 @@
 
 using namespace Tensor;
 
-int threads = 4;
+int threads = 7;
 
 std::ostream & operator << (std::ostream& out, Index_Set<>) { return out; }
 template<unsigned id, unsigned... ids>
@@ -103,7 +103,7 @@ void test_invert_matrixes_n_threadss(){
 }
 
 void test_sum_mult_op_1_threads(){
-    set_thread();
+    set_thread(2);
     tensor<int,rank<2>> t1(2,2);
     tensor<int> t3(2,2,2), t4(2);
 
