@@ -109,7 +109,7 @@ void test_sum_mult_op(){
     std::cout << '\n';
 }
 
-void test_subtract_mult_op(){
+/*void test_subtract_mult_op(){
     tensor<int,rank<2>> t1(2,2);
     tensor<int> t3(2,2,2);
 
@@ -139,7 +139,7 @@ void test_subtract_mult_op(){
     for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
         std::cout << *iter << ' ';
     std::cout << '\n';
-}
+}*/
 
 void test_sum_2244_2442(){
     tensor<int> t1(2,2), t3(2,2,4,4), t4(2,4,4,2);
@@ -205,6 +205,7 @@ void test10(){
 }
 
 void test_mult_all_ranked(){
+    set_thread(4);
     tensor<int,rank<2>> t2(2,2);
     tensor<int,rank<3>> t3(2,2,2);
     tensor<int,rank<1>> t4(2);
@@ -271,6 +272,7 @@ void test_simple_assignment(){
 }
 
 void test_simple_mult_222_2(){
+    set_thread(2);
     tensor<int> t3(2,2,2), t4(2);
 
     int count=0;
@@ -330,5 +332,5 @@ int main(){
     a.add(test_simple_mult_222_2, "test_simple_mult_222_2");
     a.add(test_very_long_mult, "test_very_long_mult");
 
-    a.launch_test(14);
+    a.launch_test(-1);
 }

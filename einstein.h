@@ -10,7 +10,11 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
 #define char_index(symb) CIndex<(#symb)[0]>()
 */
 
-void set_thread()
+int N = 1;
+
+void set_thread(int N2){
+    N = N2;
+}
 
 
 //struct holding dynamic info about index (using an unsigned to guarantee as many indices as we want)
@@ -171,7 +175,6 @@ void set_thread()
             setup();
             x.setup();
 
-
             std::vector<std::thread> threads;
             if(N==1){
                 while(!end()) {
@@ -324,7 +327,7 @@ void set_thread()
         std::vector<size_t> widths;
         std::vector<size_t> strides;
         std::vector<size_t> idxs;
-        size_t N=4;
+        // size_t N=4;
         std::vector<std::vector<size_t>> thread_indxs = std::vector<std::vector<size_t>>(N);
 
 
