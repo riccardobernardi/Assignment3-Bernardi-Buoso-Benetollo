@@ -15,36 +15,28 @@ std::ostream & operator << (std::ostream& out, Index_Set<id, ids...>) {
     return out << id << ' ' << Index_Set<ids...>();
 }
 
-void test1(){
+void test_indexlib(){
     //a bit of fun with the Index_Set library ;)
     typedef Index_Set<2,3,5,3> myset;
     std::cout << myset() << "-> " << index_count<myset>::value <<'\n';
 }
 
-void test2(){
-    //a bit of fun with the Index_Set library ;)
-    typedef Index_Set<2,3,5,3> myset;
-    std::cout << myset() << "-> " << index_count<myset>::value <<'\n';
-}
-
-void test3(){
+void test_nonrepeat(){
     typedef Index_Set<2,3,5,3> myset;
     typedef non_repeat<myset>::set my_nonrepeat_set;
     std::cout << my_nonrepeat_set() << "-> " << index_count<my_nonrepeat_set>::value << "\n";
 }
 
-void test4(){
+void test_diff(){
     typedef Index_Set<2,3,5,3> myset;
     typedef non_repeat<myset>::set my_nonrepeat_set;
     typedef Index_Set<2,3,5,3> myset;
-
     std::cout << set_diff<myset,my_nonrepeat_set>::type() << "\n";
 }
 
-void test5(){
+void test_merge(){
     typedef Index_Set<2,3,5,3> myset;
     typedef non_repeat<myset>::set my_nonrepeat_set;
-    typedef Index_Set<2,3,5,3> myset;
 
     std::cout << is_same_nonrepeat<my_nonrepeat_set,Index_Set<5,2>>::value << ' ' <<
     is_same_nonrepeat<my_nonrepeat_set,Index_Set<5,3,2>>::value << "\n\n";
@@ -53,7 +45,7 @@ void test5(){
 }
 
 
-void test6(){
+void test_iter_tensor(){
     //testing Einstein notation
     tensor<int,rank<2>> t1(2,2), t2(2,2);
 
@@ -66,7 +58,7 @@ void test6(){
 }
 
 
-void test7(){
+void test_invert_matrixes(){
     tensor<int,rank<2>> t1(2,2), t2(2,2);
 
     int count=0;
@@ -87,29 +79,32 @@ void test7(){
 }
 
 void test8(){
-    tensor<int,rank<2>> t1(2,2), t2(2,2);
+    tensor<int,rank<2>> t1(2,2);
+    tensor<int> t3(2,2,2), t4(2);
 
     int count=0;
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
         *iter = count++;
+    count=0;
+    for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
+        *iter = count++;
+
+
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        std::cout << *iter << ' ';
+    std::cout << '\n';
+
+    for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
         std::cout << *iter << ' ';
     std::cout << '\n';
 
     auto i=new_index;
     auto j=new_index;
-
-    tensor<int> t3(2,2,2), t4(2);
     auto k=new_index;
-    count=0;
-    for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
-        *iter = count++;
 
     t4(i) = t3(i,j,k)*t1(j,k)+t3(i,k,k);
-    for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
-        std::cout << *iter << ' ';
-    std::cout << '\n';
 
+    std::cout << "here the result of [t4(i) = t3(i,j,k)*t1(j,k)+t3(i,k,k)];" << std::endl;
     for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
         std::cout << *iter << ' ';
     std::cout << '\n';
@@ -251,13 +246,12 @@ void test14(){
 
 int main(){
     Test a{};
-    a.add(test1, "test1");
-    a.add(test2, "test2");
-    a.add(test3, "test3");
-    a.add(test4, "test4");
-    a.add(test5, "test5");
-    a.add(test6, "test6");
-    a.add(test7, "test7");
+    a.add(test_indexlib, "test_indexlib");
+    a.add(test_nonrepeat, "test_nonrepeat");
+    a.add(test_diff, "test_diff");
+    a.add(test_merge, "test_merge");
+    a.add(test_iter_tensor, "test_iter_tensor");
+    a.add(test_invert_matrixes, "test_invert_matrixes");
     a.add(test8, "test8");
     a.add(test9, "test9");
     a.add(test10, "test10");

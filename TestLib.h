@@ -31,7 +31,7 @@ private:
 public:
     void launch_test(int x){
         if(x == -1){
-            for(unsigned long i=1; i<_functions.size()+1;++i){
+            for(unsigned long i=0; i<_functions.size();++i){
                 //pid_t pid = fork();
                 //if (pid == 0) {
                 std::cout << "vvvv---------------TEST " << i+ 1<< "-----------------------vvvv" << std::endl;

@@ -209,8 +209,6 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
                             }
                         }
                     }), span, thread_indxs[i]);
-
-                    //threads[i].join();
                 }
 
                 for(auto t = threads.begin(); t != threads.end(); ++t){
