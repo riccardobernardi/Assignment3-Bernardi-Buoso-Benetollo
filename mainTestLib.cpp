@@ -517,17 +517,17 @@ void test_mega_sum_1_threads(){
     int count=0;
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
         // *iter = count++;
-        *iter = 0;
+        *iter = 1;
     count=0;
     for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
         // *iter = count++;
-        *iter = 0;
+        *iter = 1;
 
     auto i=new_index;
     auto j=new_index;
     auto k=new_index;
 
-    tensor<int> t4 = t3(i,j,k,k)+t1(i,j,k,k,k);
+    tensor<int> t4 = t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k);
 }
 
 void test_mega_sum_n_threads(){
@@ -538,17 +538,17 @@ void test_mega_sum_n_threads(){
     int count=0;
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
         // *iter = count++;
-        *iter = 0;
+        *iter = 1;
     count=0;
     for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
         // *iter = count++;
-        *iter = 0;
+        *iter = 1;
 
     auto i=new_index;
     auto j=new_index;
     auto k=new_index;
 
-    tensor<int> t4 = t3(i,j,k,k)+t1(i,j,k,k,k);
+    tensor<int> t4 = t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k);
 }
 
 
