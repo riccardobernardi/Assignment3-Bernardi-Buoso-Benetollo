@@ -511,40 +511,44 @@ void test_simple_mult_222_2_n_threads(){
 
 void test_mega_sum_1_threads(){
     set_thread();
-    tensor<int,rank<4>> t1(2,2,8,10);
+    tensor<int,rank<5>> t1(2,2,8,200,100);
     tensor<int,rank<4>> t3(2,2,8,9);
 
     int count=0;
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
-        *iter = count++;
+        // *iter = count++;
+        *iter = 0;
     count=0;
     for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
-        *iter = count++;
+        // *iter = count++;
+        *iter = 0;
 
     auto i=new_index;
     auto j=new_index;
     auto k=new_index;
 
-    tensor<int> t4 = t3(i,j,k,k)+t1(i,j,k,k);
+    tensor<int> t4 = t3(i,j,k,k)+t1(i,j,k,k,k);
 }
 
 void test_mega_sum_n_threads(){
     set_thread(threads);
-    tensor<int,rank<4>> t1(2,2,8,10);
+    tensor<int,rank<5>> t1(2,2,8,200,100);
     tensor<int,rank<4>> t3(2,2,8,9);
 
     int count=0;
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
-        *iter = count++;
+        // *iter = count++;
+        *iter = 0;
     count=0;
     for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
-        *iter = count++;
+        // *iter = count++;
+        *iter = 0;
 
     auto i=new_index;
     auto j=new_index;
     auto k=new_index;
 
-    tensor<int> t4 = t3(i,j,k,k)+t1(i,j,k,k);
+    tensor<int> t4 = t3(i,j,k,k)+t1(i,j,k,k,k);
 }
 
 
