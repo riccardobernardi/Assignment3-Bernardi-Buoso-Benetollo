@@ -239,6 +239,7 @@ void set_thread(size_t n_threads = 1){
                     (*t).join();
                 }
             }
+            std::cout << "number of threads: " << N << std::endl;
             return *this;
         }
 
@@ -737,12 +738,21 @@ void set_thread(size_t n_threads = 1){
 
     template<typename T, class IDX1, class E1, class IDX2, class E2>
     einstein_expression<T,typename merge<IDX1,typename set_diff<IDX2,typename non_repeat<IDX1>::set>::type>::type,
-            einstein_subtraction<einstein_expression<T,IDX1,E1>,einstein_expression<T,IDX2,E2>>>
+            einstein_subtraction<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>>
     operator - (einstein_expression<T,IDX1,E1> &&e1, einstein_expression<T,IDX2,E2> &&e2) {
         static_assert(is_same_nonrepeat<typename non_repeat<IDX1>::set,typename non_repeat<IDX2>::set>::value);
         return einstein_expression<T,typename merge<IDX1,typename set_diff<IDX2,typename non_repeat<IDX1>::set>::type>::type,
                 einstein_subtraction<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>>(std::move(e1),std::move(e2));
     };
+
+    /*template<typename T, class IDX1, class E1, class IDX2, class E2>
+    einstein_expression<T,typename merge<IDX1,typename set_diff<IDX2,typename non_repeat<IDX1>::set>::type>::type,
+            einstein_subtraction<einstein_expression<T,IDX1,E1>,einstein_expression<T,IDX2,E2>>>
+    operator - (einstein_expression<T,IDX1,E1> &&e1, einstein_expression<T,IDX2,E2> &&e2) {
+        static_assert(is_same_nonrepeat<typename non_repeat<IDX1>::set,typename non_repeat<IDX2>::set>::value);
+        return einstein_expression<T,typename merge<IDX1,typename set_diff<IDX2,typename non_repeat<IDX1>::set>::type>::type,
+                einstein_subtraction<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>>(std::move(e1),std::move(e2));
+    };*/
 
 
 };
