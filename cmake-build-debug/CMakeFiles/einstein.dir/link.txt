@@ -1,0 +1,1 @@
+/usr/bin/c++   -pthread -g   CMakeFiles/einstein.dir/einstein.cc.o  -o einstein 

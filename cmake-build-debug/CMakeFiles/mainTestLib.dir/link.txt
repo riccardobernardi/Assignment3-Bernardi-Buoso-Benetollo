@@ -1,0 +1,1 @@
+/usr/bin/c++   -pthread -g   CMakeFiles/mainTestLib.dir/mainTestLib.cpp.o  -o mainTestLib 
