@@ -187,7 +187,33 @@ void set_thread(size_t n_threads = 1){
             setup();
             x.setup();
 
+            size_t counter = 1;
+            for(auto w = widths.begin(); w != widths.end(); ++w){
+                counter *= (*w);
+            }
             std::vector<std::thread> threads;
+            std::vector<int> span = std::vector<int>(N, counter / N); //number of jobs for each thread
+
+            size_t tmp = counter % N;
+
+            while(tmp > 0){         //if counter % N > 0 some threads will has more jobs then others
+                ++span[tmp - 1];
+                --tmp;
+            }
+
+            int tpos = 0, old = 0; //using old position to maintain tpos value, since tpos is modified in next loop
+            for(int i = 0; i < N; ++i){
+                thread_indxs.at(i) = std::vector<size_t>(widths.size());
+                old = tpos;
+
+
+                for(int j = widths.size()-1; j >= 0; --j){
+                    thread_indxs.at(i).at(j) = tpos % widths.at(j);
+                    tpos = tpos / widths.at(j);
+                }
+                tpos = old + span[i];
+            }
+
             if(N==1){
                 while(!end()) {
                     eval() += x.eval();
@@ -195,30 +221,9 @@ void set_thread(size_t n_threads = 1){
                     x.next();
                 }
             }else{
-                size_t counter = 1;
-                for(auto w = widths.begin(); w != widths.end(); ++w){
-                    counter *= (*w);
-                }
-
-                std::vector<int> span = std::vector<int>(N, counter / N); //number of jobs for each thread
-                int tmp = counter % N;
-
-                while(tmp > 0){         //if counter % N > 0 some threads will has more jobs then others
-                    ++span[tmp - 1];
-                    --tmp;
-                }
-                int tpos = 0, old = 0; //using old position to maintain tpos value, since tpos is modified in next loop
                 for(int i = 0; i < N; ++i){
-                    old = tpos;
-
-                    thread_indxs.at(i) = std::vector<size_t>(widths.size());
-                    for(int j = widths.size()-1; j >= 0; --j){
-                        thread_indxs.at(i).at(j) = tpos % widths.at(j);
-                        tpos = tpos / widths.at(j);
-                    }
-
                     threads.emplace_back(([this, &x](int span, std::vector<size_t> indxs){
-                        for(int k = 0; k< span; k++) {
+                        for(int k = 0; k< span; ++k) {
                             teval(indxs) += x.teval(indxs);
 
                             unsigned index = indxs.size()-1;
@@ -226,18 +231,15 @@ void set_thread(size_t n_threads = 1){
 
                             while(indxs[index] == widths[index] && index>0) {
                                 indxs[index] = 0;
-
                                 --index;
                                 ++indxs[index];
                             }
                         }
                     }), span[i], thread_indxs[i]);
-
-                    tpos = old + span[i];
                 }
 
-                for(auto t = threads.begin(); t != threads.end(); ++t){
-                    (*t).join();
+                for(auto & thread : threads){
+                    thread.join();
                 }
             }
             std::cout << "number of threads: " << N << std::endl;
