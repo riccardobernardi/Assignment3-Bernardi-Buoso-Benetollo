@@ -128,8 +128,40 @@ void set_thread(size_t n_threads = 1){
 
 
 
+    /*//wrapper class that contain the current index and current value of an expression
+    template<typename T> class PosWrapper<T>{
+        public:
+
+            PosWrapper(T* ptr, std::vector<size_t> idx, std::vector<size_t> widths, std::vector<size_t> strides) : ptr(ptr), idx(idx) , widths(widths), strides(strides){}
+
+            T& eval(){
+                return *ptr;
+            }
+
+            void next() {
+                unsigned index = idx.size()-1;
+                ++idx[index];
+                ptr += strides[index];
+
+                while(idx[index]==widths[index] && index>0) {
+                    idx[index]=0;
+                    ptr -= widths[index]*strides[index];
+
+                    --index;
+                    ++idx[index];
+                    ptr += strides[index];
+                }
+            }
 
 
+        private:
+            std::vector<size_t> widths;
+            std::vector<size_t> strides;
+
+            T* ptr;
+            std::vector<size_t> idx;
+    };
+*/
 
 
 
