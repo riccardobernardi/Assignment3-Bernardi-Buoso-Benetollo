@@ -82,6 +82,7 @@ public:
                 b.toc();
                 std::cout << "^^^^---------------TEST " << i+1 << "-----------------------^^^^" << std::endl;
                 //}else{}
+                sleep(1);
             }
         }else{
             //pid_t pid = fork();
