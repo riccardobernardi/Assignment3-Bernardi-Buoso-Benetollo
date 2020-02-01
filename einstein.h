@@ -16,6 +16,7 @@ void set_thread(size_t n_threads = 1){
     unsigned int max_n = std::thread::hardware_concurrency();
 
     if(max_n == 0 or n_threads == 0){
+        std::cout << "Number of threads reduced to 1: " << max_n << std::endl;
         N = 1;
     }
     else if(n_threads <= max_n){
