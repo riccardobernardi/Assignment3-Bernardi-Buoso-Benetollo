@@ -125,51 +125,12 @@ void set_thread(size_t n_threads = 1){
 
 
 
-
-
-
-    /*//wrapper class that contain the current index and current value of an expression
-    template<typename T> class PosWrapper<T>{
-        public:
-
-            PosWrapper(T* ptr, std::vector<size_t> idx, std::vector<size_t> widths, std::vector<size_t> strides) : ptr(ptr), idx(idx) , widths(widths), strides(strides){}
-
-            T& eval(){
-                return *ptr;
-            }
-
-            void next() {
-                unsigned index = idx.size()-1;
-                ++idx[index];
-                ptr += strides[index];
-
-                while(idx[index]==widths[index] && index>0) {
-                    idx[index]=0;
-                    ptr -= widths[index]*strides[index];
-
-                    --index;
-                    ++idx[index];
-                    ptr += strides[index];
-                }
-            }
-
-
-        private:
-            std::vector<size_t> widths;
-            std::vector<size_t> strides;
-
-            T* ptr;
-            std::vector<size_t> idx;
-    };
-*/
-
-
-
     struct einstein_proxy;
     template<class T, class U> struct einstein_binary;
     template<class T, class U> struct einstein_multiplication;
     template<class T, class U> struct einstein_addition;
     template<class T, class U> struct einstein_subtraction;
+    template<class T> class PosWrapper;
 
     template<typename T, class IDX, class type=einstein_proxy> class einstein_expression;
 
@@ -249,18 +210,14 @@ void set_thread(size_t n_threads = 1){
                     }
 
                     threads.emplace_back(([this, &x](int span, std::vector<size_t> indxs){
+                        auto p1 = PosWrappper(this, indxs);
+                        auto p2 = PosWrappper(x, indxs);
+
                         for(int k = 0; k< span; k++) {
-                            teval(indxs) += x.teval(indxs);
+                            p1.eval() += p2.eval();
 
-                            unsigned index = indxs.size()-1;
-                            ++indxs[index];
-
-                            while(indxs[index] == widths[index] && index>0) {
-                                indxs[index] = 0;
-
-                                --index;
-                                ++indxs[index];
-                            }
+                            p1.next();
+                            p2.next();
                         }
                     }), span[i], thread_indxs[i]);
 
@@ -309,6 +266,7 @@ void set_thread(size_t n_threads = 1){
 
         template<typename T2, class type2> friend class tensor;
         template<typename T2, class IDX2, class type2> friend class einstein_expression;
+        template<typename T2> friend class PosWrappper;
 
     protected:
 
@@ -382,7 +340,6 @@ void set_thread(size_t n_threads = 1){
         std::vector<size_t> idxs;
         // size_t N=4;
         std::vector<std::vector<size_t>> thread_indxs = std::vector<std::vector<size_t>>(N);
-
 
         T* const start_ptr;
         T* current_ptr;
@@ -785,6 +742,48 @@ void set_thread(size_t n_threads = 1){
         return einstein_expression<T,typename merge<IDX1,typename set_diff<IDX2,typename non_repeat<IDX1>::set>::type>::type,
                 einstein_subtraction<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>>(std::move(e1),std::move(e2));
     };*/
+
+
+    //wrapper class that contain the current index and current value of an expression
+    template<typename T> class PosWrapper{
+    public:
+
+        PosWrapper(einstein_expression<T,dynamic,einstein_proxy>& x, std::vector<size_t> idx) : ptr(x.start_ptr), idx(idx) , widths(x.widths), strides(x.strides){
+            for(int i = idx.size() - 1; i >= 0; --i){
+                ptr += idx[i] * strides[i];
+            }
+        }
+
+        template<class T2, class TYPE2>
+        PosWrapper(einstein_expression<T2,dynamic,TYPE2>&& x, std::vector<size_t> idx){}
+
+        T& eval(){
+            return *ptr;
+        }
+
+        void next() {
+            unsigned index = idx.size()-1;
+            ++idx[index];
+            ptr += strides[index];
+
+            while(idx[index]==widths[index] && index>0) {
+                idx[index]=0;
+                ptr -= widths[index]*strides[index];
+
+                --index;
+                ++idx[index];
+                ptr += strides[index];
+            }
+        }
+
+
+    private:
+        std::vector<size_t> widths;
+        std::vector<size_t> strides;
+
+        T* ptr;
+        std::vector<size_t> idx;
+    };
 
 
 };
