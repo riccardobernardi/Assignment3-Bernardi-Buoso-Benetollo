@@ -9,7 +9,7 @@
 
 using namespace Tensor;
 
-int threads = 4;
+int threads = 8;
 
 std::ostream & operator << (std::ostream& out, Index_Set<>) { return out; }
 template<unsigned id, unsigned... ids>
@@ -810,10 +810,12 @@ int main(){
     a.add(test_mega_sum_1_threads_second_try,"test_mega_sum_1_threads_second_try");
     a.add(test_mega_sum_n_threads_second_try,"test_mega_sum_n_threads_second_try");
 
-    //a.launch_test(28);
-    //a.launch_test(29);
-    //a.launch_test(30);
-    //a.launch_test(31);
+    a.launch_test(28);
+    a.launch_test(29);
+    sleep(2);
+    a.launch_test(30);
+    a.launch_test(31);
+    sleep(2);
     a.launch_test(32);
     a.launch_test(33);
 }
