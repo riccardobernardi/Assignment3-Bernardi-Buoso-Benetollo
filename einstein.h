@@ -202,12 +202,9 @@ void set_thread(size_t n_threads = 1){
                 --tmp;
             }
 
-            for (int l = 0; l < counter; ++l) {
-                thread_indxs.at(l) = std::vector<size_t>(widths.size());
-            }
-
-            // qui puo essere ottimizzato poiche sappiamo gia le widths a priori, non serve fare il while interno
+            int tpos = 0, old = 0; //using old position to maintain tpos value, since tpos is modified in next loop
             for(int i = 0; i < counter; ++i){
+                thread_indxs.at(i) = std::vector<size_t>(widths.size());
                 unsigned index = thread_indxs.at(i).size()-1;
                 ++thread_indxs.at(i)[index];
 
@@ -226,15 +223,16 @@ void set_thread(size_t n_threads = 1){
                 }
             }else{
                 for(int i = 0; i < N; ++i){
-                    threads.emplace_back(([this, &x](int span, int nthread){
+                    threads.emplace_back(([this, &x](int span, std::vector<size_t> indxs){
                         for(int k = 0; k< span; ++k) {
-                            teval(thread_indxs.at(+k)) += x.teval(thread_indxs.at(nthread+k));
+                            teval(indxs) += x.teval(indxs);
                         }
-                    }), span[i], i*span[i]);
+                    }), span[i], thread_indxs[i]);
                 }
-            }
-            for(auto & thread : threads){
-                thread.join();
+
+                for(auto & thread : threads){
+                    thread.join();
+                }
             }
             std::cout << "number of threads: " << N << std::endl;
             return *this;
