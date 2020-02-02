@@ -191,6 +191,7 @@ void set_thread(size_t n_threads = 1){
             for(auto w = widths.begin(); w != widths.end(); ++w){
                 counter *= (*w);
             }
+            thread_indxs = std::vector<std::vector<size_t>>(counter);
             std::vector<std::thread> threads;
             std::vector<int> span = std::vector<int>(N, counter / N); //number of jobs for each thread
 
@@ -202,16 +203,16 @@ void set_thread(size_t n_threads = 1){
             }
 
             int tpos = 0, old = 0; //using old position to maintain tpos value, since tpos is modified in next loop
-            for(int i = 0; i < N; ++i){
+            for(int i = 0; i < counter; ++i){
                 thread_indxs.at(i) = std::vector<size_t>(widths.size());
-                old = tpos;
+                unsigned index = thread_indxs.at(i).size()-1;
+                ++thread_indxs.at(i)[index];
 
-
-                for(int j = widths.size()-1; j >= 0; --j){
-                    thread_indxs.at(i).at(j) = tpos % widths.at(j);
-                    tpos = tpos / widths.at(j);
+                while(thread_indxs.at(i)[index] == widths[index] && index>0) {
+                    thread_indxs.at(i)[index] = 0;
+                    --index;
+                    ++thread_indxs.at(i)[index];
                 }
-                tpos = old + span[i];
             }
 
             if(N==1){
@@ -225,15 +226,6 @@ void set_thread(size_t n_threads = 1){
                     threads.emplace_back(([this, &x](int span, std::vector<size_t> indxs){
                         for(int k = 0; k< span; ++k) {
                             teval(indxs) += x.teval(indxs);
-
-                            unsigned index = indxs.size()-1;
-                            ++indxs[index];
-
-                            while(indxs[index] == widths[index] && index>0) {
-                                indxs[index] = 0;
-                                --index;
-                                ++indxs[index];
-                            }
                         }
                     }), span[i], thread_indxs[i]);
                 }
@@ -352,7 +344,8 @@ void set_thread(size_t n_threads = 1){
         std::vector<size_t> strides;
         std::vector<size_t> idxs;
         // size_t N=4;
-        std::vector<std::vector<size_t>> thread_indxs = std::vector<std::vector<size_t>>(N);
+        //std::vector<std::vector<size_t>> thread_indxs = std::vector<std::vector<size_t>>(N);
+        std::vector<std::vector<size_t>> thread_indxs;
 
 
         T* const start_ptr;
