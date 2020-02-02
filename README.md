@@ -13,41 +13,33 @@
 ## Table of contents
 
 1. Introduction and general structure
-2. Indexes
-3. Proxy Tensor class
-4. Dynamically ranked tensors 
-5. Statically ranked tensors 
-6. Examples
+2. The move operator
+3. The eval operator
+4. Performances
+5. Examples
 
 ## 1 Introduction and general structure
 
+### 1.1 Parsing of the library
 
+### 1.2 Move concept
 
-## 2 Indexes
+### 1.3 Eval concept
 
-## 3 Proxy tensor class
+## 2 Multithreading Move
 
-### 3.1 General
+### 2.1 Before
 
-### 3.2 Utilities module
+### 2.2 After
 
-## 4 Dynamically proxy Tensor
+## 3 Threaded-Eval
 
-### 4.1 Friends
+### 3.1 Before
 
-### 4.2 Fields
+### 3.1 After
 
-### 4.3 Constructors
+## 4 Performances
 
-### 4.4 Methods
-
-### 4.5 Operators
-
-### 4.6 Changements in the tensor's class
-## 5 Statically ranked tensors
-### 5.1 Naive solution
-### 5.2 Incomplete solution
-
-##  6 Examples
+##  5 Examples
 
 
