@@ -90,7 +90,7 @@ Our idea is to create multiple threads, each of them performing the eval funtion
 For this purpose we created a new function called teval, specifically designed for thread evaluation, which accepts an index as a parameter and calculates the correct location at which the thread needs to access.
 
 ```c++
-T& teval(std::vector<size_t> indxs) const {
+T& eval(std::vector<size_t> indxs) const {
     auto ptr = start_ptr;
 
     for(int i = indxs.size() - 1; i >= 0; --i){
@@ -104,18 +104,20 @@ After calling teval, index is updated using by incrementing the current pointer 
 
 From our previous experience we know that to parallelise matrix operations you have to split the matrix in N_THREADS parts that are independent and only then launching threads on them. This part of the code in the move was the part of the code that seems to necessitate this kind of improvement since inside it is performed a sum between the resulting tensor and the right-expression of the move operator.
 
-- explain better what we modified and how we did it 
+The move assignment operator was also modified but we are going only to describe how it works from an abstract point of view, to understand more about it we advise to check the code attached.
 
-## 3 Eval Function
+The move checks if the N_THREADS is set to 1 and in this case the code that is run is the one provided by the professor, instead if the number is different then the code that is performed computes initially the span. It is the number of cells that every thread should elaborate. After that it is computed the index that should be accessed by the tensors(both this and x). This last fact is peculiar and it is because we cannot store and pass a vector of pointer, for this reason we have to pass the tensor index and then the **eval** of every einstein expression will compute the right position using the own's strides, this means that doing this way we are guaranteed that every tensor computes the right position.
 
-### 3.1 Before
+After this preamble comes the core of our implementation that launches a lambda that as parameters take the span(number of cells to be computed) and the starting index assigned to that precise thread, furthermore we pass in the closure also the **this** and the **x**. Every threads then cycles **span** times to compute all assigned cells calling the **eval** on the **this** and on the **x** and moving the current index of one position forward. After incrementing the current index it is checked that it respects the bounds imposed by the **widths** of the tensor.
 
-### 3.1 After
+At the end all the threads are caught by a **join**.
 
 ## 4 Performances
 
-##  5 Examples
+We have measured all the performances at every test and we have noticed that no improvement was introduced by the mean of the multithreading. So we tried to silence(ie comment) our entire code searching a lower bound for the improvement and we discovered that the basic code is really efficient and that the code we used to parallelise introduced a little overhead but since the code is already efficient our code was equally performing or worst performing. After this simple experiment we ended up at the idea that the greatest cost of all was the building of the parsing tree. 
 
-## 6 Biblioraphy
+We also decided to go deeper into the possible operations that could perform better exploiting the threads regardless of the multi-threading overhead. We tried so to produce big tensors of low rank, no contractions an no multiplications but only summations. We ended up discovering that with a rank 3 tensor with dimensions <400,400,400> summed for itself our multi-threaded version can gain up to 13 seconds with respects to the basic version.
+
+## 5 Biblioraphy
 
 https://github.com/riccardobernardi/TestLib

@@ -199,7 +199,7 @@ void set_thread(size_t n_threads = 1){
                     counter *= (*w);
                 }
                 std::vector<std::thread> threads;
-                std::vector<int> span = std::vector<int>(N, counter / N); //number of jobs for each thread
+                std::vector<int> span =  std::vector<int>(N, counter / N); //number of jobs for each thread
 
                 size_t tmp = counter % N;
 
