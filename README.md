@@ -87,7 +87,7 @@ void set_thread(size_t n_threads = 1){
 We added informations to the fields of the tensor to perform the parallelisation such as a matrix that contains N_threads rows and a column for every index that is present in the output tensor.
 
 Our idea is to create multiple threads, each of them performing the eval funtion over a specific location.
-For this purpose we created a new function called teval, specifically designed for thread evaluation, which accepts an index as a parameter and calculates the correct location at which the thread needs to access.
+For this purpose we overload the eval function, specifically designed for thread evaluation, which accepts an index as a parameter and calculates the correct location at which the thread needs to access.
 
 ```c++
 T& eval(std::vector<size_t> indxs) const {
@@ -100,17 +100,88 @@ T& eval(std::vector<size_t> indxs) const {
     return *ptr;
 }
 ```
-After calling teval, index is updated using by incrementing the current pointer by one.
+After calling this new eval, index is incremented by one with the respect of the bounds.
 
 From our previous experience we know that to parallelise matrix operations you have to split the matrix in N_THREADS parts that are independent and only then launching threads on them. This part of the code in the move was the part of the code that seems to necessitate this kind of improvement since inside it is performed a sum between the resulting tensor and the right-expression of the move operator.
 
 The move assignment operator was also modified but we are going only to describe how it works from an abstract point of view, to understand more about it we advise to check the code attached.
 
-The move checks if the N_THREADS is set to 1 and in this case the code that is run is the one provided by the professor, instead if the number is different then the code that is performed computes initially the span. It is the number of cells that every thread should elaborate. After that it is computed the index that should be accessed by the tensors(both this and x). This last fact is peculiar and it is because we cannot store and pass a vector of pointer, for this reason we have to pass the tensor index and then the **eval** of every einstein expression will compute the right position using the own's strides, this means that doing this way we are guaranteed that every tensor computes the right position.
+The move checks if the N_THREADS is set to 1 and in this case the code that is run is the one provided by the initial library, instead if the number is larger then 1, the code behaive to parallelize the operations.
 
-After this preamble comes the core of our implementation that launches a lambda that as parameters take the span(number of cells to be computed) and the starting index assigned to that precise thread, furthermore we pass in the closure also the **this** and the **x**. Every threads then cycles **span** times to compute all assigned cells calling the **eval** on the **this** and on the **x** and moving the current index of one position forward. After incrementing the current index it is checked that it respects the bounds imposed by the **widths** of the tensor.
+For fist we caluculate the vector span, that contains at position i the number of cell that the i-th thread should elaborate.
+```c++
+size_t counter = 1;
+for(auto w = widths.begin(); w != widths.end(); ++w){
+    counter *= (*w);
+}
+std::vector<int> span =  std::vector<int>(N, counter / N); //number of jobs for each thread
 
+size_t tmp = counter % N;
+
+while(tmp > 0){         //if counter % N > 0 some threads will has more jobs then others
+    ++span[tmp - 1];
+    --tmp;
+}
+```
+ After that it is computed the index that should be accessed by the tensors(both this and x). The vector thread_indxs contains at position i the index at which the i-th thread start to compute.
+```c++
+int tpos = 0, old = 0; //using old position to maintain tpos value, since tpos is modified in next loop
+for(int i = 0; i < N; ++i){
+    thread_indxs.at(i) = std::vector<size_t>(widths.size());
+    old = tpos;
+
+
+    for(int j = widths.size()-1; j >= 0; --j){
+        thread_indxs.at(i).at(j) = tpos % widths.at(j);
+        tpos = tpos / widths.at(j);
+    }
+    tpos = old + span[i];
+}
+```
+ This last fact is peculiar and it is because we cannot store and pass a vector of pointer, because x could be composed by several subexpression with several pointers, for this reason we have to pass the tensor index, then the new **eval** of every einstein expression will compute the right position using the own's strides, it means that doing this way we are guaranteed that every tensor computes the right position without generating a race condition.
+
+After this preamble comes the core of our implementation that launches a lambda that as parameters take the span(number of cells to be computed) and the starting index assigned to that precise thread, furthermore we pass in the closure also the **this** and the **x**. Every threads cycles **span** times to compute all assigned cells calling the **eval** on the **this** and on the **x** and moving the current index of one position forward. After incrementing the current index it is checked that it respects the bounds imposed by the **widths** of the tensor.
+```c++
+threads.emplace_back(([this, &x](int span, std::vector<size_t> indxs){
+    for(int k = 0; k< span; ++k) {
+        eval(indxs) += x.eval(indxs);
+
+        unsigned index = indxs.size()-1;
+        ++indxs[index];
+
+        while(indxs[index] == widths[index] && index>0) {
+            indxs[index] = 0;
+            --index;
+            ++indxs[index];
+        }
+    }
+}), span[i], thread_indxs[i]);
+```
 At the end all the threads are caught by a **join**.
+
+### 2.2.1 Eval in different expressions
+
+We could have different cases of expression on wich the eval can be computed, in every case, like the basic case, the function take as input the an index vector and return a T object.
+
+In the case of multiplication we execute the eval on each factor and then return their product.
+```c++
+T eval(std::vector<size_t> indxs) {
+    return exp1.eval(indxs) * exp2.eval(indxs);
+}
+```
+In the case of addition or subtraction we execute the eval on each element and then return their sum or difference.
+```c++
+T eval(std::vector<size_t> indxs) {
+    return exp1.eval(indxs) + exp2.eval(indxs);
+}
+```
+```c++
+T eval(std::vector<size_t> indxs) {
+    return exp1.eval(indxs) - exp2.eval(indxs);
+}
+```
+
+## 3 Other solutions
 
 ## 4 Performances
 
