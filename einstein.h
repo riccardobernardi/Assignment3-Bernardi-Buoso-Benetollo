@@ -610,11 +610,6 @@ void set_thread(size_t n_threads = 1){
         std::map<Index,index_data> index_map;
     };
 
-
-
-
-
-
     template<typename T, class E1, class E2> class einstein_expression<T,dynamic,einstein_addition<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> :
             public einstein_expression<T,dynamic,einstein_binary<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> {
         using einstein_expression<T,dynamic,einstein_binary<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>>::einstein_expression;
@@ -642,7 +637,6 @@ void set_thread(size_t n_threads = 1){
             return exp1.teval(indxs) + exp2.teval(indxs);
         }
     };
-
 
     template<typename T, class E1, class E2> class einstein_expression<T,dynamic,einstein_subtraction<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> :
             public einstein_expression<T,dynamic,einstein_binary<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>> {
