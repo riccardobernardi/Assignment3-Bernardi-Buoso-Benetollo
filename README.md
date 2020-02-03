@@ -40,7 +40,7 @@ We come up with the fact of modifying this part adding multi-threading because f
 
 ### 2.2 After
 
-
+We added informations to the fields of the tensor to perform the parallelisation such as a matrix that contains N_threads rows and a column for every index that is present in the output tensor.
 
 ## 3 Threaded-Eval
 
