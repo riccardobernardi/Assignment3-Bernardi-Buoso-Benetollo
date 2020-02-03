@@ -25,6 +25,8 @@
 - description of the problem
 - Tools used, testing library, thread library
 
+This report describes the solution we ha have found of the thrid assignment about the parallelisation of addition, subtraction and contraction on tensors. We started from the solution provided by the professor and we noticed that the library was implemented to build a parsing tree of the Einstein expression given as input. The base class is 
+
 ## 2 The move operator
 
 ### 2.1 Before
