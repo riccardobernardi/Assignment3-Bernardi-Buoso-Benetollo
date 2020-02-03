@@ -55,13 +55,39 @@ while(!end()) {
     x.next();
 }
 ```
-As we can see in the code above, operations are performed iteratively calling the functions eval and next, which respectively write in the new expression and update the base pointer to data.
-The eval function actually access data and is used in all of the classes involved in the operations, but slightly differs between them, depending one the mathematical operation to be performed.
-Tne next function updates the pointer to data that will be accessed by eval funtion. 
-Theese are to core operations we want to perform in parallel, so we need to coordinate multiple access to the base pointer in order to resolve race condition and avoid access to the same location.
+As we can see in the code above, operations are performed iteratively calling the functions eval and next, which respectively write in the new expression and update the current pointer to data.
+The **eval** function actually access data and is used in all of the classes involved in the operations, but slightly differs between them, depending one the mathematical operation to be performed.
+The **next** function updates the pointer to data that will be accessed by eval funtion by increasing the values of the current pointer and the index of the proxy tensor (with the respect of the bounds).
+Theese are the core operations that we want to perform in parallel, so we need to coordinate multiple access to the pointer in order to resolve race condition and avoid access to the same location.
+
+- explain better why threading is here
+
+### 2.2 After
+
+Before start executing the expressions, we permit to the user to choose the number of thread that he want to use for parallelize the different operations. The function check if the number of thread given in input is at least equal to 1, otherwise set it to 1, and less then the maximum number of threads that the machine can support, otherwise set it to the max number of threads.
+
+```c++
+void set_thread(size_t n_threads = 1){
+    unsigned int max_n = std::thread::hardware_concurrency();
+
+    if(max_n == 0 or n_threads == 0){
+        std::cout << "Number of threads set to 1: " << max_n << std::endl;
+        N = 1;
+    }
+    else if(n_threads <= max_n){
+        N = n_threads;
+    }
+    else{
+        std::cout << "Number of threads reduced to the maximum supported by the machine: " << max_n << std::endl;
+        N = max_n;
+    }
+}
+```
+
+We added informations to the fields of the tensor to perform the parallelisation such as a matrix that contains N_threads rows and a column for every index that is present in the output tensor.
 
 Our idea is to create multiple threads, each of them performing the eval funtion over a specific location.
-For this purpose we created a new function called teval, specifically designed for thread evaluation, which accepts an index as a parameter and calculates the correct location at which the thread needs to access. 
+For this purpose we created a new function called teval, specifically designed for thread evaluation, which accepts an index as a parameter and calculates the correct location at which the thread needs to access.
 
 ```c++
 T& teval(std::vector<size_t> indxs) const {
@@ -78,12 +104,7 @@ After calling teval, index is updated using by incrementing the current pointer 
 
 From our previous experience we know that to parallelise matrix operations you have to split the matrix in N_THREADS parts that are independent and only then launching threads on them. This part of the code in the move was the part of the code that seems to necessitate this kind of improvement since inside it is performed a sum between the resulting tensor and the right-expression of the move operator.
 
-- explain better why threading is here
 - explain better what we modified and how we did it 
-
-### 2.2 After
-
-We added informations to the fields of the tensor to perform the parallelisation such as a matrix that contains N_threads rows and a column for every index that is present in the output tensor.
 
 ## 3 Eval Function
 
