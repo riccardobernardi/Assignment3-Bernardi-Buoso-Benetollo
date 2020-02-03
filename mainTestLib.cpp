@@ -866,7 +866,5 @@ int main(){
     a.add(test_great_matrix22_low_rank_1_thread,"test_great_matrix22_low_rank_1_thread");
     a.add(test_great_matrix22_low_rank_n_thread,"test_great_matrix22_low_rank_n_thread");
 
-    a.launch_test(34);
-    sleep(2);
-    a.launch_test(35);
+    a.launch_test(-1);
 }

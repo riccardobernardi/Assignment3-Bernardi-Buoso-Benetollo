@@ -224,7 +224,7 @@ void set_thread(size_t n_threads = 1){
                 for(int i = 0; i < N; ++i){
                     threads.emplace_back(([this, &x](int span, std::vector<size_t> indxs){
                         for(int k = 0; k< span; ++k) {
-                            teval(indxs) += x.teval(indxs);
+                            eval(indxs) += x.eval(indxs);
 
                             unsigned index = indxs.size()-1;
                             ++indxs[index];
@@ -308,7 +308,7 @@ void set_thread(size_t n_threads = 1){
 
         T& eval() { return *current_ptr; }
 
-        T& teval(std::vector<size_t> indxs) const {
+        T& eval(std::vector<size_t> indxs) {
             auto ptr = start_ptr;
 
             for(int i = indxs.size() - 1; i >= 0; --i){
@@ -458,8 +458,8 @@ void set_thread(size_t n_threads = 1){
 
         T eval() { return exp1.eval() * exp2.eval(); }
 
-        T teval(std::vector<size_t> indxs) const {
-            return exp1.teval(indxs) * exp2.teval(indxs);
+        T eval(std::vector<size_t> indxs) {
+            return exp1.eval(indxs) * exp2.eval(indxs);
         }
 
         std::map<Index,index_data>& get_index_map() { return index_map; }
@@ -633,8 +633,8 @@ void set_thread(size_t n_threads = 1){
 
         T eval() { return exp1.eval() + exp2.eval(); }
 
-        T teval(std::vector<size_t> indxs) const {
-            return exp1.teval(indxs) + exp2.teval(indxs);
+        T eval(std::vector<size_t> indxs) {
+            return exp1.eval(indxs) + exp2.eval(indxs);
         }
     };
 
@@ -661,8 +661,8 @@ void set_thread(size_t n_threads = 1){
 
         T eval() { return exp1.eval() - exp2.eval(); }
 
-        T teval(std::vector<size_t> indxs) const {
-            return exp1.teval(indxs) - exp2.teval(indxs);
+        T eval(std::vector<size_t> indxs) {
+            return exp1.eval(indxs) - exp2.eval(indxs);
         }
     };
 
