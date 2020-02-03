@@ -27,13 +27,21 @@
 
 This report describes the solution we ha have found of the thrid assignment about the parallelisation of addition, subtraction and contraction on tensors. We started from the solution provided by the professor and we noticed that the library was implemented to build a parsing tree of the Einstein expression given as input. The base class is 
 
+```
+template<typename T> class einstein_expression<T,dynamic,einstein_proxy>
+```
+
+
+
 ## 2 The move operator
 
 ### 2.1 Before
 
 Before our modification the move was sequential and the operations that was performed is here below:
 
+```
 -------CODE
+```
 
 The meaning of the code above is that when a move is performed then every operation that is involved has to evaluate itself and then has to move the pointer on the next position until the entire move is performed. The eval and next are overloaded in every expression that inherit from the base class so we put many attention in modifying correctly also them.
 
