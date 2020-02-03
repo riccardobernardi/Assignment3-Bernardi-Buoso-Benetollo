@@ -78,7 +78,8 @@ After calling teval, index is updated using by incrementing the current pointer 
 
 From our previous experience we know that to parallelise matrix operations you have to split the matrix in N_THREADS parts that are independent and only then launching threads on them. This part of the code in the move was the part of the code that seems to necessitate this kind of improvement since inside it is performed a sum between the resulting tensor and the right-expression of the move operator.
 
-- explain better why threading is here 
+- explain better why threading is here
+- explain better what we modified and how we did it 
 
 ### 2.2 After
 
