@@ -56,7 +56,8 @@ public:
         }else{
             std::cout << "Elapsed time in seconds : "
                       << std::chrono::duration_cast<std::chrono::seconds>(stop - this->init).count()
-                      << " sec" << std::endl;
+                      << " sec" << " : " << std::chrono::duration_cast<std::chrono::microseconds>(stop - init).count()
+                                << " µs" << std::endl;
         }
 
 

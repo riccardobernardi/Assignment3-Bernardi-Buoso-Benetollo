@@ -9,7 +9,7 @@
 
 using namespace Tensor;
 
-int threads = 8;
+int threads = 4;
 
 std::ostream & operator << (std::ostream& out, Index_Set<>) { return out; }
 template<unsigned id, unsigned... ids>
@@ -774,6 +774,58 @@ void test_mega_sum_n_threads_second_try(){
                      +t1(i,j,k,k,k);
 }
 
+void test_great_matrix_low_rank_1_thread(){
+    set_thread();
+    tensor<int,rank<3>> t1(1000,1000,1000);
+
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = 1;
+
+    auto i=new_index;
+    auto j=new_index;
+
+    tensor<int> t4 = t1(i,i,j) + t1(i,i,j);
+}
+
+void test_great_matrix_low_rank_n_thread(){
+    set_thread(threads);
+    tensor<int,rank<3>> t1(1000,1000,1000);
+
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = 1;
+
+    auto i=new_index;
+    auto j=new_index;
+
+    tensor<int> t4 = t1(i,i,j) + t1(i,i,j);
+}
+
+void test_great_matrix22_low_rank_1_thread(){
+    set_thread();
+    tensor<int,rank<2>> t1(4000,4000);
+
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = 1;
+
+    auto i=new_index;
+    auto j=new_index;
+
+    tensor<int> t4 = t1(i,j) + t1(i,j);
+}
+
+void test_great_matrix22_low_rank_n_thread(){
+    set_thread(threads);
+    tensor<int,rank<2>> t1(4000,4000);
+
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = 1;
+
+    auto i=new_index;
+    auto j=new_index;
+
+    tensor<int> t4 = t1(i,j) + t1(i,j);
+}
+
 int main(){
     Test a{};
     a.add(test_indexlib, "test_indexlib");
@@ -809,13 +861,12 @@ int main(){
     a.add(test_very_long_mult_n_thread_third_try, "test_very_long_mult_n_thread_third_try");
     a.add(test_mega_sum_1_threads_second_try,"test_mega_sum_1_threads_second_try");
     a.add(test_mega_sum_n_threads_second_try,"test_mega_sum_n_threads_second_try");
+    a.add(test_great_matrix_low_rank_1_thread,"test_great_matrix_low_rank_1_thread");
+    a.add(test_great_matrix_low_rank_n_thread,"test_great_matrix_low_rank_n_thread");
+    a.add(test_great_matrix22_low_rank_1_thread,"test_great_matrix22_low_rank_1_thread");
+    a.add(test_great_matrix22_low_rank_n_thread,"test_great_matrix22_low_rank_n_thread");
 
-    a.launch_test(28);
-    a.launch_test(29);
+    a.launch_test(34);
     sleep(2);
-    a.launch_test(30);
-    a.launch_test(31);
-    sleep(2);
-    a.launch_test(32);
-    a.launch_test(33);
+    a.launch_test(35);
 }
