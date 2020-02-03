@@ -123,14 +123,12 @@ void set_thread(size_t n_threads = 1){
         static constexpr bool value = find<head,U>::value && is_same_nonrepeat<Index_Set<tail...>,typename remove_all<head,U>::type>::value;
     };
 
-
-
+    template<class T> class PtrWrapper;
     struct einstein_proxy;
     template<class T, class U> struct einstein_binary;
     template<class T, class U> struct einstein_multiplication;
     template<class T, class U> struct einstein_addition;
     template<class T, class U> struct einstein_subtraction;
-    template<class T> class PosWrapper;
 
     template<typename T, class IDX, class type=einstein_proxy> class einstein_expression;
 
@@ -210,14 +208,17 @@ void set_thread(size_t n_threads = 1){
                     }
 
                     threads.emplace_back(([this, &x](int span, std::vector<size_t> indxs){
-                        auto p1 = PosWrappper(this, indxs);
-                        auto p2 = PosWrappper(x, indxs);
+                        auto p1 = PtrWrapper<T>(indxs);
+                        auto p2 = PtrWrapper<T>(indxs);
+
+                        setPtr(p1);
+                        x.setPtr(p2);
 
                         for(int k = 0; k< span; k++) {
-                            p1.eval() += p2.eval();
+                            eval(p1) += x.eval(p2);
 
-                            p1.next();
-                            p2.next();
+                            next(p1);
+                            x.next(p2);
                         }
                     }), span[i], thread_indxs[i]);
 
@@ -266,7 +267,6 @@ void set_thread(size_t n_threads = 1){
 
         template<typename T2, class type2> friend class tensor;
         template<typename T2, class IDX2, class type2> friend class einstein_expression;
-        template<typename T2> friend class PosWrappper;
 
     protected:
 
@@ -295,14 +295,16 @@ void set_thread(size_t n_threads = 1){
 
         T& eval() { return *current_ptr; }
 
-        T& teval(std::vector<size_t> indxs) const {
-            auto ptr = start_ptr;
+        void setPtr(PtrWrapper<T>& p) const{
+            p.ptr = start_ptr;
 
-            for(int i = indxs.size() - 1; i >= 0; --i){
-                ptr += indxs[i] * strides[i];
+            for(int i = strides.size() - 1; i >= 0; --i){
+                p.ptr += (p.idx)[i] * strides[i];
             }
+        }
 
-            return *ptr;
+        T& eval(PtrWrapper<T>& p) const {
+            return *(p.ptr);
         }
 
         void next() {
@@ -317,6 +319,21 @@ void set_thread(size_t n_threads = 1){
                 --index;
                 ++idxs[index];
                 current_ptr += strides[index];
+            }
+        }
+
+        void next(PtrWrapper<T>& p) {
+            unsigned index = (p.idx).size()-1;
+            ++(p.idx[index]);
+            p.ptr += strides[index];
+
+            while((p.idx)[index]==widths[index] && index>0) {
+                idxs[index]=0;
+                (p.ptr) -= widths[index]*strides[index];
+
+                --index;
+                ++(p.idx)[index];
+                (p.ptr) += strides[index];
             }
         }
 
@@ -338,7 +355,6 @@ void set_thread(size_t n_threads = 1){
         std::vector<size_t> widths;
         std::vector<size_t> strides;
         std::vector<size_t> idxs;
-        // size_t N=4;
         std::vector<std::vector<size_t>> thread_indxs = std::vector<std::vector<size_t>>(N);
 
         T* const start_ptr;
@@ -436,16 +452,28 @@ void set_thread(size_t n_threads = 1){
         bool end() { return exp1.end(); }
 
 
-
         void next() {
             exp1.next();
             exp2.next();
         }
 
+        void next(PtrWrapper<T>& p) {
+            exp1.next( *(p.child1) );
+            exp2.next( *(p.child2) );
+        }
+
         T eval() { return exp1.eval() * exp2.eval(); }
 
-        T teval(std::vector<size_t> indxs) const {
-            return exp1.teval(indxs) * exp2.teval(indxs);
+        void setPtr(PtrWrapper<T>& p) const{
+            p.child1 = std::make_shared<PtrWrapper<T>>( PtrWrapper<T>( p.idx ) );
+            p.child2 = std::make_shared<PtrWrapper<T>>( PtrWrapper<T>( p.idx ) );
+
+            exp1.setPtr( *(p.child1) );
+            exp2.setPtr( *(p.child2) );
+        }
+
+        T eval(PtrWrapper<T>& p) const {
+            return exp1.eval( *(p.child1) ) * exp2.eval( *(p.child2) );
         }
 
         std::map<Index,index_data>& get_index_map() { return index_map; }
@@ -564,6 +592,19 @@ void set_thread(size_t n_threads = 1){
             exp2.next();
         }
 
+        void next(PtrWrapper<T>& p) {
+            exp1.next( *(p.child1) );
+            exp2.next( *(p.child2) );
+        }
+
+        void setPtr(PtrWrapper<T>& p) const{
+            p.child1 = std::make_shared<PtrWrapper<T>>( PtrWrapper<T>( p.idx ) );
+            p.child2 = std::make_shared<PtrWrapper<T>>( PtrWrapper<T>( p.idx ) );
+
+            exp1.setPtr( *(p.child1) );
+            exp2.setPtr( *(p.child2) );
+        }
+
         std::map<Index,index_data>& get_index_map() { return index_map; }
 
         std::pair<tensor<T,dynamic>,einstein_expression<T,dynamic>> prepare_conversion() {
@@ -624,8 +665,8 @@ void set_thread(size_t n_threads = 1){
 
         T eval() { return exp1.eval() + exp2.eval(); }
 
-        T teval(std::vector<size_t> indxs) const {
-            return exp1.teval(indxs) + exp2.teval(indxs);
+        T eval(PtrWrapper<T>& p) const {
+            return exp1.eval( *(p.child1) ) + exp2.eval( *(p.child2) );
         }
     };
 
@@ -653,8 +694,8 @@ void set_thread(size_t n_threads = 1){
 
         T eval() { return exp1.eval() - exp2.eval(); }
 
-        T teval(std::vector<size_t> indxs) const {
-            return exp1.teval(indxs) - exp2.teval(indxs);
+        T eval(PtrWrapper<T>& p) const {
+            return exp1.eval( *(p.child1) ) - exp2.eval( *(p.child2) );
         }
     };
 
@@ -745,44 +786,25 @@ void set_thread(size_t n_threads = 1){
 
 
     //wrapper class that contain the current index and current value of an expression
-    template<typename T> class PosWrapper{
+    template<typename T> class PtrWrapper{
     public:
 
-        PosWrapper(einstein_expression<T,dynamic,einstein_proxy>& x, std::vector<size_t> idx) : ptr(x.start_ptr), idx(idx) , widths(x.widths), strides(x.strides){
-            for(int i = idx.size() - 1; i >= 0; --i){
-                ptr += idx[i] * strides[i];
-            }
-        }
+        PtrWrapper(const PtrWrapper& p) = default;
 
-        template<class T2, class TYPE2>
-        PosWrapper(einstein_expression<T2,dynamic,TYPE2>&& x, std::vector<size_t> idx){}
+        PtrWrapper(T* ptr, std::vector<size_t>& idx) : ptr(ptr), idx(idx), child1(nullptr), child2(nullptr){}
 
-        T& eval(){
-            return *ptr;
-        }
+        PtrWrapper(std::vector<size_t>& idx) : ptr(nullptr), idx(idx), child1(nullptr), child2(nullptr){}
 
-        void next() {
-            unsigned index = idx.size()-1;
-            ++idx[index];
-            ptr += strides[index];
+        PtrWrapper(PtrWrapper* p1, PtrWrapper* p2) : child1(p1), child2(p2), ptr(nullptr){}
 
-            while(idx[index]==widths[index] && index>0) {
-                idx[index]=0;
-                ptr -= widths[index]*strides[index];
-
-                --index;
-                ++idx[index];
-                ptr += strides[index];
-            }
-        }
-
+        template<typename T2, class IDX2, class type2> friend class einstein_expression;
 
     private:
-        std::vector<size_t> widths;
-        std::vector<size_t> strides;
+        std::vector<size_t> idx;
 
         T* ptr;
-        std::vector<size_t> idx;
+        std::shared_ptr<PtrWrapper> child1;
+        std::shared_ptr<PtrWrapper> child2;
     };
 
 
