@@ -30,8 +30,17 @@ This report describes the solution we ha have found of the thrid assignment abou
 ```
 template<typename T> class einstein_expression<T,dynamic,einstein_proxy>
 ```
+and it takes as a template parameter an expression proxy, that can be another einstein expression in order to perform the basic operations described above, which are the following :
 
+```
+template<typename T, class E1, class E2> class einstein_expression<T,dynamic,einstein_multiplication<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>>
+template<typename T, class E1, class E2> class einstein_expression<T,dynamic,einstein_binary<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>>
+template<typename T, class E1, class E2> class einstein_expression<T,dynamic,einstein_addition<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>>
+template<typename T, class E1, class E2> class einstein_expression<T,dynamic,einstein_subtraction<einstein_expression<T,dynamic,E1>,einstein_expression<T,dynamic,E2>>>
+```
 
+We were asked to trasform the current version of the library into a multithreaded one and avoiding to modify the multiplication operation. After that we were asked to parallelise only on non-repeated indexes of the tensors. 
+We solved the problem by the mean of standard threads provided by the c++ standard library. Plus we also used a testing library developed by some students during this course available on github (see the references).
 
 ## 2 The move operator
 
@@ -63,4 +72,6 @@ We added informations to the fields of the tensor to perform the parallelisation
 
 ##  5 Examples
 
+## 6 Biblioraphy
 
+https://github.com/riccardobernardi/TestLib
