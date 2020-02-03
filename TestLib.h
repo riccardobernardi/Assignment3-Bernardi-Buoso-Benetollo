@@ -51,12 +51,14 @@ public:
             }else{
                 std::cout << "Elapsed time in milliseconds : "
                           << std::chrono::duration_cast<std::chrono::milliseconds>(stop - init).count()
-                          << " ms" << std::endl;
+                          << " ms"" : " << std::chrono::duration_cast<std::chrono::microseconds>(stop - init).count()
+                          << " µs" << std::endl;
             }
         }else{
             std::cout << "Elapsed time in seconds : "
                       << std::chrono::duration_cast<std::chrono::seconds>(stop - this->init).count()
-                      << " sec" << std::endl;
+                      << " sec" << " : " << std::chrono::duration_cast<std::chrono::microseconds>(stop - init).count()
+                      << " µs" << std::endl;
         }
 
 
