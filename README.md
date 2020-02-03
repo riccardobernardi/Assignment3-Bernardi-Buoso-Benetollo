@@ -42,19 +42,41 @@ template<typename T, class E1, class E2> class einstein_expression<T,dynamic,ein
 We were asked to trasform the current version of the library into a multithreaded one and avoiding to modify the multiplication operation. After that we were asked to parallelise only on non-repeated indexes of the tensors. 
 We solved the problem by the mean of standard threads provided by the c++ standard library. Plus we also used a testing library developed by some students during this course available on github (see the references).
 
-## 2 The move operator
+## 2 The move assignment operator
 
 ### 2.1 Before
 
-Before our modification the move was sequential and the operations that was performed is here below:
+Before our modification the move operator performed sequential operations as we can see below:
 
+```c++
+while(!end()) {
+    eval() += x.eval();
+    next();
+    x.next();
+}
 ```
--------CODE
+As we can see in the code above, operations are performed iteratively calling the functions eval and next, which respectively write in the new expression and update the base pointer to data.
+The eval function actually access data and is used in all of the classes involved in the operations, but slightly differs between them, depending one the mathematical operation to be performed.
+Tne next function updates the pointer to data that will be accessed by eval funtion. 
+Theese are to core operations we want to perform in parallel, so we need to coordinate multiple access to the base pointer in order to resolve race condition and avoid access to the same location.
+
+Our idea is to create multiple threads, each of them performing the eval funtion over a specific location.
+For this purpose we created a new function called teval, specifically designed for thread evaluation, which accepts an index as a parameter and calculates the correct location at which the thread needs to access. 
+
+```c++
+T& teval(std::vector<size_t> indxs) const {
+    auto ptr = start_ptr;
+
+    for(int i = indxs.size() - 1; i >= 0; --i){
+        ptr += indxs[i] * strides[i];
+    }
+
+    return *ptr;
+}
 ```
+After calling teval, index is updated using by incrementing the current pointer by one.
 
-The meaning of the code above is that when a move is performed then every operation that is involved has to evaluate itself and then has to move the pointer on the next position until the entire move is performed. The eval and next are overloaded in every expression that inherit from the base class so we put many attention in modifying correctly also them.
-
-We come up with the fact of modifying this part adding multi-threading because from our previous experience we know that to parallelise matrix operations you have to split the matrix in N_THREADS parts that are independent and only then launching threads on them. This part of the code in the move was the part of the code that seems to necessitate this kind of improvement since inside it is performed a sum between the resulting tensor and the right-expression of the move operator.
+From our previous experience we know that to parallelise matrix operations you have to split the matrix in N_THREADS parts that are independent and only then launching threads on them. This part of the code in the move was the part of the code that seems to necessitate this kind of improvement since inside it is performed a sum between the resulting tensor and the right-expression of the move operator.
 
 - explain better why threading is here 
 
