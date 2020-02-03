@@ -14,19 +14,18 @@
 
 1. Introduction and general structure
 2. The move operator
-3. The eval operator
+3. Eval Function
 4. Performances
 5. Examples
 
 ## 1 Introduction and general structure
 
-### 1.1 Parsing of the expression
+- description of the library given from the professor
+- parsing tree build
+- description of the problem
+- Tools used, testing library, thread library
 
-### 1.2 Move concept
-
-### 1.3 Eval concept
-
-## 2 Multithreading Move
+## 2 The move operator
 
 ### 2.1 Before
 
@@ -38,11 +37,13 @@ The meaning of the code above is that when a move is performed then every operat
 
 We come up with the fact of modifying this part adding multi-threading because from our previous experience we know that to parallelise matrix operations you have to split the matrix in N_THREADS parts that are independent and only then launching threads on them. This part of the code in the move was the part of the code that seems to necessitate this kind of improvement since inside it is performed a sum between the resulting tensor and the right-expression of the move operator.
 
+- explain better why threading is here 
+
 ### 2.2 After
 
 We added informations to the fields of the tensor to perform the parallelisation such as a matrix that contains N_threads rows and a column for every index that is present in the output tensor.
 
-## 3 Threaded-Eval
+## 3 Eval Function
 
 ### 3.1 Before
 
