@@ -16,6 +16,7 @@
 2. The move operator
 3. Other Solutions
 4. Performances
+5. Conclusion and further development
 
 ## 1 Introduction and general structure
 
@@ -182,35 +183,71 @@ T eval(std::vector<size_t> indxs) {
 
 ## 3 Other solutions
 
-Since we really wanted to improve the performances we approached the problem in a different way. The main problem up to us was the fact that every thread was forced to run an enormous number of nexts to arrive at the right point to modify the cell that was assigned to him. This was surely a bottle-neck. We thought that passing a more complex object to the **eval** function that embedded more informations could have lead to a lower number of nexts. this at the end should have lead to better performances regardless to a slightly more overhead due to the more complex object passed.
+Since we really wanted to improve the performances we approached the problem in a different way. The main problem up to us was that every time the new eval was called it has to start from the start_ptr, to avoid racce conditions, of the expression and iterate to the pointer that correspond to the index given as input. We thought that passing a more complex object to the **eval** function that embedded the pointer and increments it without generating race conditions.
 
-the solution is called PtrWrapper and the code is here below:
+For this purpose we create an object called **PtrWrapper** (friend class of einstein_expression) that mantain the index of the cell to point, the pointer in case the expression is contain only by one proxy tensors (in our case the right element of the move oprator), and two shared pointer child1 and child2 that point to two other PtrWrapper in case the expression is coposed by two subexpressions (for example if we have a multiplication).
 
 ```c++
 //wrapper class that contain the current index and current value of an expression
 template<typename T> class PtrWrapper{
   public:
 
-  PtrWrapper(const PtrWrapper& p) = default;
+    PtrWrapper(const PtrWrapper& p) = default;
 
-  PtrWrapper(T* ptr, std::vector<size_t>& idx) : ptr(ptr), idx(idx), child1(nullptr), child2(nullptr){}
+    PtrWrapper(T* ptr, std::vector<size_t>& idx) : ptr(ptr), idx(idx), child1(nullptr), child2(nullptr){}
 
-  PtrWrapper(std::vector<size_t>& idx) : ptr(nullptr), idx(idx), child1(nullptr), child2(nullptr){}
+    PtrWrapper(std::vector<size_t>& idx) : ptr(nullptr), idx(idx), child1(nullptr), child2(nullptr){}
 
-  PtrWrapper(PtrWrapper* p1, PtrWrapper* p2) : child1(p1), child2(p2), ptr(nullptr){}
+    PtrWrapper(PtrWrapper* p1, PtrWrapper* p2) : child1(p1), child2(p2), ptr(nullptr){}
 
-  template<typename T2, class IDX2, class type2> friend class einstein_expression;
+    template<typename T2, class IDX2, class type2> friend class einstein_expression;
 
   private:
-  std::vector<size_t> idx;
+    std::vector<size_t> idx;
 
-  T* ptr;
-  std::shared_ptr<PtrWrapper> child1;
-  std::shared_ptr<PtrWrapper> child2;
+    T* ptr;
+    std::shared_ptr<PtrWrapper> child1;
+    std::shared_ptr<PtrWrapper> child2;
 };
 ```
 
+Thanks to this new pointer wrapper we can simplify the overloaded eval function that now takes as input a PtrWrapper and return the value pointed by its ptr, this remove the overhead introduced by the iterations of the previous version, and we also implement an overloaded **next()** function that takes as input a PtrWrapper and increment its ptr and index fields, with the respect of the bounds; so we build a new lambda expression with this new functions.
 
+```c++
+threads.emplace_back(([this, &x](int span, std::vector<size_t> indxs){
+    auto p1 = PtrWrapper<T>(indxs);
+    auto p2 = PtrWrapper<T>(indxs);
+
+    setPtr(p1);
+    x.setPtr(p2);
+
+    for(int k = 0; k< span; k++) {
+        eval(p1) += x.eval(p2);
+
+        next(p1);
+        x.next(p2);
+    }
+}), span[i], thread_indxs[i]);
+```
+
+The function **setPtr()** intialize the pointer of PtrWrapper to the position given by the index takes as input by the constructor.
+
+### 3.1 PtrWrapper in different expressions
+
+When the expression is composed by two subexpressions (multiplication, addition, subtraction), the new eval takes as input a PtrWrapper and compute return the result of the operation between the eval() of the two child of the PtrWrapper given as input.
+In the same way, the new next() function copute two next() that take as input the two child of the PtrWrapper given as input.
+
+The main difference shows up in the setPtr() function in which we assign to child1 and child2 two new shared pointer to new PtrWrapper object, and then we call the setPtr() on the two child for the respective subexpression.
+
+```c++
+void setPtr(PtrWrapper<T>& p) const{
+    p.child1 = std::make_shared<PtrWrapper<T>>( PtrWrapper<T>( p.idx ) );
+    p.child2 = std::make_shared<PtrWrapper<T>>( PtrWrapper<T>( p.idx ) );
+
+    exp1.setPtr( *(p.child1) );
+    exp2.setPtr( *(p.child2) );
+}
+```
 
 ## 4 Performances
 
@@ -247,3 +284,4 @@ Many other tests were perfromed but only on few cases there were a perceptible i
 
 The testa are conducted by the mean of a library developed during this course by a team of students and it can be found at https://github.com/riccardobernardi/TestLib, it was developed by Bernardi, Cecchini, Cazzaro, Zanatta, Buoso, Benetollo.
 
+## 5 Conclusion and further development
