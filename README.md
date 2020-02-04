@@ -218,6 +218,8 @@ We have measured all the performances at every test and we have noticed that no 
 
 We also decided to go deeper into the possible operations that could perform better exploiting the threads regardless of the multi-threading overhead. We tried so to produce big tensors of low rank, no contractions an no multiplications but only summations. We ended up discovering that with a rank 3 tensor with dimensions <400,400,400> summed for itself our multi-threaded version can gain up to 13 seconds with respect to the sequential version.
 
+An example of the tests we tried is here below:
+
 ```c++
 void test_great_matrix_low_rank_n_thread(){
     set_thread(threads);
@@ -233,6 +235,8 @@ void test_great_matrix_low_rank_n_thread(){
 }
 ```
 
+Some of the measure that we gained are summarised here below:
+
 | Sequential              | Sequential            | Concurrent | Concurrent             | Improved? | PtrWrapper? |
 | ----------------------- | --------------------- | ---------- | ---------------------- | --------- | ----------- |
 | Test 34, 1000x1000x1000 | 246sec / 246327362 µs | Test 35    | 240 sec : 240171331 µs | Yes       | No          |
@@ -240,4 +244,6 @@ void test_great_matrix_low_rank_n_thread(){
 | Test 24, hundred sums   | 500ms                 | Test 25    | 475ms                  | Yes       | Yes         |
 
 Many other tests were perfromed but only on few cases there were a perceptible improvement.
+
+The testa are conducted by the mean of a library developed during this course by a team of students and it can be found at https://github.com/riccardobernardi/TestLib, it was developed by Bernardi, Cecchini, Cazzaro, Zanatta, Buoso, Benetollo.
 
