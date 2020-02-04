@@ -186,8 +186,28 @@ Since we really wanted to improve the performances we approached the problem in 
 
 the solution is called PtrWrapper and the code is here below:
 
-```
+```c++
+//wrapper class that contain the current index and current value of an expression
+template<typename T> class PtrWrapper{
+  public:
 
+  PtrWrapper(const PtrWrapper& p) = default;
+
+  PtrWrapper(T* ptr, std::vector<size_t>& idx) : ptr(ptr), idx(idx), child1(nullptr), child2(nullptr){}
+
+  PtrWrapper(std::vector<size_t>& idx) : ptr(nullptr), idx(idx), child1(nullptr), child2(nullptr){}
+
+  PtrWrapper(PtrWrapper* p1, PtrWrapper* p2) : child1(p1), child2(p2), ptr(nullptr){}
+
+  template<typename T2, class IDX2, class type2> friend class einstein_expression;
+
+  private:
+  std::vector<size_t> idx;
+
+  T* ptr;
+  std::shared_ptr<PtrWrapper> child1;
+  std::shared_ptr<PtrWrapper> child2;
+};
 ```
 
 
