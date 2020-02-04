@@ -277,7 +277,7 @@ Some of the measure that we gained are summarised here below:
 | Sequential              | Sequential            | Concurrent | Concurrent             | Improved? | PtrWrapper? |
 | ----------------------- | --------------------- | ---------- | ---------------------- | --------- | ----------- |
 | Test 34, 1000x1000x1000 | 246sec / 246327362 µs | Test 35    | 240 sec : 240171331 µs | Yes       | No          |
-| Test 36, 4000x4000      | 4 sec : 4521288 µs    | Test 37    | 3 sec : 7599215 µs     | No        | Yes         |
+| Test 36, 4000x4000      | 4 sec : 4521288 µs    | Test 37    | 3 sec                  | No        | Yes         |
 | Test 24, hundred sums   | 500ms                 | Test 25    | 475ms                  | Yes       | Yes         |
 
 Many other tests were perfromed but only on few cases there were a perceptible improvement.
@@ -287,3 +287,5 @@ The testa are conducted by the mean of a library developed during this course by
 ## 5 Conclusion and further development
 
 In conclusions we can say that the intial sequential version of the library is already pretty optimized in terms of performance, so that for operations between small tensors we cannot see so much difference, we can get a considerable improvement only if we perform operations between tensors that has great dimensions. 
+
+One further development could be using better performing library for multithreading instead the standard thread (i.e. boost), 
