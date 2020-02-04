@@ -184,7 +184,7 @@ T eval(std::vector<size_t> indxs) {
 
 Since we really wanted to improve the performances we approached the problem in a different way. The main problem up to us was the fact that every thread was forced to run an enormous number of nexts to arrive at the right point to modify the cell that was assigned to him. This was surely a bottle-neck. We thought that passing a more complex object to the **eval** function that embedded more informations could have lead to a lower number of nexts. this at the end should have lead to better performances regardless to a slightly more overhead due to the more complex object passed.
 
-Code:
+the solution is called PtrWrapper and the code is here below:
 
 ```
 
@@ -213,10 +213,11 @@ void test_great_matrix_low_rank_n_thread(){
 }
 ```
 
-| Sequential              | Sequential            | Concurrent | Concurrent             | Improved? |
-| ----------------------- | --------------------- | ---------- | ---------------------- | --------- |
-| Test 34, 1000x1000x1000 | 246sec / 246327362 µs | Test 35    | 240 sec : 240171331 µs | Yes       |
-| Test 36, 4000x4000      | 4 sec : 4521288 µs    | Test 37    | 7 sec : 7599215 µs     | No        |
+| Sequential              | Sequential            | Concurrent | Concurrent             | Improved? | PtrWrapper? |
+| ----------------------- | --------------------- | ---------- | ---------------------- | --------- | ----------- |
+| Test 34, 1000x1000x1000 | 246sec / 246327362 µs | Test 35    | 240 sec : 240171331 µs | Yes       | No          |
+| Test 36, 4000x4000      | 4 sec : 4521288 µs    | Test 37    | 7 sec : 7599215 µs     | No        | No          |
+| Test 24, hundred sums   | 500ms                 | Test 25    | 475ms                  | Yes       | Yes         |
 
 Many other tests were perfromed but only on few cases there were a perceptible improvement.
 
