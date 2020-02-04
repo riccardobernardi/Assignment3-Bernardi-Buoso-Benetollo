@@ -14,9 +14,8 @@
 
 1. Introduction and general structure
 2. The move operator
-3. Eval Function
+3. Other Solutions
 4. Performances
-5. Examples
 
 ## 1 Introduction and general structure
 
@@ -183,12 +182,41 @@ T eval(std::vector<size_t> indxs) {
 
 ## 3 Other solutions
 
+Since we really wanted to improve the performances we approached the problem in a different way. The main problem up to us was the fact that every thread was forced to run an enormous number of nexts to arrive at the right point to modify the cell that was assigned to him. This was surely a bottle-neck. We thought that passing a more complex object to the **eval** function that embedded more informations could have lead to a lower number of nexts. this at the end should have lead to better performances regardless to a slightly more overhead due to the more complex object passed.
+
+Code:
+
+```
+
+```
+
+
+
 ## 4 Performances
 
-We have measured all the performances at every test and we have noticed that no improvement was introduced by the mean of the multithreading. So we tried to silence(ie comment) our entire code searching a lower bound for the improvement and we discovered that the basic code is really efficient and that the code we used to parallelise introduced a little overhead but since the code is already efficient our code was equally performing or worst performing. After this simple experiment we ended up at the idea that the greatest cost of all was the building of the parsing tree. 
+We have measured all the performances at every test and we have noticed that no improvement was introduced by the mean of the multithreading. So we tried to silence(ie comment) our entire code searching a lower bound for the improvement and we discovered that the initial code is really efficient and that the code we used to parallelise introduced a little overhead but since the code is already efficient our code was equally performing or worst performing. After this simple experiment we ended up at the idea that the greatest cost of all was the building of the parsing tree. 
 
-We also decided to go deeper into the possible operations that could perform better exploiting the threads regardless of the multi-threading overhead. We tried so to produce big tensors of low rank, no contractions an no multiplications but only summations. We ended up discovering that with a rank 3 tensor with dimensions <400,400,400> summed for itself our multi-threaded version can gain up to 13 seconds with respects to the basic version.
+We also decided to go deeper into the possible operations that could perform better exploiting the threads regardless of the multi-threading overhead. We tried so to produce big tensors of low rank, no contractions an no multiplications but only summations. We ended up discovering that with a rank 3 tensor with dimensions <400,400,400> summed for itself our multi-threaded version can gain up to 13 seconds with respect to the sequential version.
 
-## 5 Biblioraphy
+```c++
+void test_great_matrix_low_rank_n_thread(){
+    set_thread(threads);
+    tensor<int,rank<3>> t1(1000,1000,1000);
 
-https://github.com/riccardobernardi/TestLib
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = 1;
+
+    auto i=new_index;
+    auto j=new_index;
+
+    tensor<int> t4 = t1(i,i,j) + t1(i,i,j);
+}
+```
+
+| Sequential              | Sequential            | Concurrent | Concurrent             | Improved? |
+| ----------------------- | --------------------- | ---------- | ---------------------- | --------- |
+| Test 34, 1000x1000x1000 | 246sec / 246327362 µs | Test 35    | 240 sec : 240171331 µs | Yes       |
+| Test 36, 4000x4000      | 4 sec : 4521288 µs    | Test 37    | 7 sec : 7599215 µs     | No        |
+
+Many other tests were perfromed but only on few cases there were a perceptible improvement.
+
