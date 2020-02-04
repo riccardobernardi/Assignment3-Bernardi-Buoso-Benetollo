@@ -16,6 +16,7 @@
 2. The move operator
 3. Other Solutions
 4. Performances
+5. Conclusion and further development
 
 ## 1 Introduction and general structure
 
@@ -247,3 +248,4 @@ Many other tests were perfromed but only on few cases there were a perceptible i
 
 The testa are conducted by the mean of a library developed during this course by a team of students and it can be found at https://github.com/riccardobernardi/TestLib, it was developed by Bernardi, Cecchini, Cazzaro, Zanatta, Buoso, Benetollo.
 
+## 5 Conclusion and further development
