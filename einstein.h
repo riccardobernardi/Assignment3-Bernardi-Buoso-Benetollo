@@ -177,7 +177,6 @@ void set_thread(size_t n_threads = 1){
             setup();
             x.setup();
 
-            std::vector<std::thread> threads;
             if(N==1){
                 while(!end()) {
                     eval() += x.eval();
@@ -185,6 +184,9 @@ void set_thread(size_t n_threads = 1){
                     x.next();
                 }
             }else{
+                std::vector<std::thread> threads;
+                std::vector<std::vector<size_t>> thread_indxs = std::vector<std::vector<size_t>>(N);
+
                 size_t counter = 1;
                 for(auto w = widths.begin(); w != widths.end(); ++w){
                     counter *= (*w);
@@ -328,7 +330,7 @@ void set_thread(size_t n_threads = 1){
             p.ptr += strides[index];
 
             while((p.idx)[index]==widths[index] && index>0) {
-                idxs[index]=0;
+                p.idx[index]=0;
                 (p.ptr) -= widths[index]*strides[index];
 
                 --index;
@@ -355,7 +357,6 @@ void set_thread(size_t n_threads = 1){
         std::vector<size_t> widths;
         std::vector<size_t> strides;
         std::vector<size_t> idxs;
-        std::vector<std::vector<size_t>> thread_indxs = std::vector<std::vector<size_t>>(N);
 
         T* const start_ptr;
         T* current_ptr;
@@ -716,9 +717,7 @@ void set_thread(size_t n_threads = 1){
         einstein_expression<T,Index_Set<ids...>,einstein_proxy>& operator =(einstein_expression<T2,Index_Set<ids2...>,TYPE2>&& x) {
             static_assert(is_same_nonrepeat<Index_Set<ids...>,typename non_repeat<Index_Set<ids...>>::set>::value, "Repeated indices in lvalue Einstein expression");
             static_assert(is_same_nonrepeat<Index_Set<ids...>, typename non_repeat<Index_Set<ids2...>>::set>::value, "Non-repeated indices in lvalue and rvalue Einstein expressions are not the same");
-            //std::cout << "Qui non funziona:)" << std::endl;
             einstein_expression<T,dynamic,einstein_proxy>::operator = (static_cast<einstein_expression<T2,dynamic,TYPE2>&&>(x));
-            //std::cout << "Qui non funziona:)" << std::endl;
             return *this;
         }
     };
