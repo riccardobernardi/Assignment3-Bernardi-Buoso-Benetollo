@@ -195,14 +195,14 @@ void set_thread(size_t n_threads = 1){
                 }
             }else{
                 std::vector<std::thread> threads;
+                threads.reserve(N);
                 std::vector<std::vector<size_t>> thread_indxs = std::vector<std::vector<size_t>>(N);
 
                 size_t counter = 1;
                 for(auto w = widths.begin(); w != widths.end(); ++w){
                     counter *= (*w);
                 }
-                std::vector<std::thread> threads;
-                threads.reserve(N);
+
                 std::vector<int> span =  std::vector<int>(N, counter / N); //number of jobs for each thread
 
                 size_t tmp = counter % N;
