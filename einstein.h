@@ -199,6 +199,7 @@ void set_thread(size_t n_threads = 1){
                     counter *= (*w);
                 }
                 std::vector<std::thread> threads;
+                threads.reserve(N);
                 std::vector<int> span =  std::vector<int>(N, counter / N); //number of jobs for each thread
 
                 size_t tmp = counter % N;
@@ -222,7 +223,7 @@ void set_thread(size_t n_threads = 1){
                 }
 
                 for(int i = 0; i < N; ++i){
-                    threads.emplace_back(([this, &x](int span, std::vector<size_t> indxs){
+                    threads.emplace_back([this, &x](int span, std::vector<size_t> indxs){
                         for(int k = 0; k< span; ++k) {
                             eval(indxs) += x.eval(indxs);
 
@@ -235,7 +236,7 @@ void set_thread(size_t n_threads = 1){
                                 ++indxs[index];
                             }
                         }
-                    }), span[i], thread_indxs[i]);
+                    }, span[i], thread_indxs[i]);
                 }
 
                 for(auto & thread : threads){

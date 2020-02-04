@@ -9,7 +9,7 @@
 
 using namespace Tensor;
 
-int threads = 4;
+int threads = 8;
 
 std::ostream & operator << (std::ostream& out, Index_Set<>) { return out; }
 template<unsigned id, unsigned... ids>
