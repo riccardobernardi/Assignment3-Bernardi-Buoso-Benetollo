@@ -183,31 +183,31 @@ T eval(std::vector<size_t> indxs) {
 
 ## 3 Other solutions
 
-Since we really wanted to improve the performances we approached the problem in a different way. The main problem up to us was the fact that every thread was forced to run an enormous number of nexts to arrive at the right point to modify the cell that was assigned to him. This was surely a bottle-neck. We thought that passing a more complex object to the **eval** function that embedded more informations could have lead to a lower number of nexts. this at the end should have lead to better performances regardless to a slightly more overhead due to the more complex object passed.
+Since we really wanted to improve the performances we approached the problem in a different way. The main problem up to us was that every time the new eval was called it has to start from the start_ptr, to avoid racce conditions, of the expression and iterate to the pointer that correspond to the index given as input. We thought that passing a more complex object to the **eval** function that embedded the pointer and increments it without generating race conditions.
 
-the solution is called PtrWrapper and the code is here below:
+For this purpose we create an object called **PtrWrapper** that mantain the index of the cell to point, the pointer in case the expression is coposed only by one proxy tensors (in our case the right element of the move oprator), and two shared pointer child1 and child2 that point to two other PtrWrapper in case the expression is coposed by two proxy tensors (for example if we have a multiplication).
 
 ```c++
 //wrapper class that contain the current index and current value of an expression
 template<typename T> class PtrWrapper{
   public:
 
-  PtrWrapper(const PtrWrapper& p) = default;
+    PtrWrapper(const PtrWrapper& p) = default;
 
-  PtrWrapper(T* ptr, std::vector<size_t>& idx) : ptr(ptr), idx(idx), child1(nullptr), child2(nullptr){}
+    PtrWrapper(T* ptr, std::vector<size_t>& idx) : ptr(ptr), idx(idx), child1(nullptr), child2(nullptr){}
 
-  PtrWrapper(std::vector<size_t>& idx) : ptr(nullptr), idx(idx), child1(nullptr), child2(nullptr){}
+    PtrWrapper(std::vector<size_t>& idx) : ptr(nullptr), idx(idx), child1(nullptr), child2(nullptr){}
 
-  PtrWrapper(PtrWrapper* p1, PtrWrapper* p2) : child1(p1), child2(p2), ptr(nullptr){}
+    PtrWrapper(PtrWrapper* p1, PtrWrapper* p2) : child1(p1), child2(p2), ptr(nullptr){}
 
-  template<typename T2, class IDX2, class type2> friend class einstein_expression;
+    template<typename T2, class IDX2, class type2> friend class einstein_expression;
 
   private:
-  std::vector<size_t> idx;
+    std::vector<size_t> idx;
 
-  T* ptr;
-  std::shared_ptr<PtrWrapper> child1;
-  std::shared_ptr<PtrWrapper> child2;
+    T* ptr;
+    std::shared_ptr<PtrWrapper> child1;
+    std::shared_ptr<PtrWrapper> child2;
 };
 ```
 
