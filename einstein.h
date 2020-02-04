@@ -194,11 +194,13 @@ void set_thread(size_t n_threads = 1){
                     x.next();
                 }
             }else{
+                std::vector<std::thread> threads;
+                std::vector<std::vector<size_t>> thread_indxs = std::vector<std::vector<size_t>>(N);
+
                 size_t counter = 1;
                 for(auto w = widths.begin(); w != widths.end(); ++w){
                     counter *= (*w);
                 }
-                std::vector<std::thread> threads;
                 std::vector<int> span =  std::vector<int>(N, counter / N); //number of jobs for each thread
 
                 size_t tmp = counter % N;
@@ -351,8 +353,6 @@ void set_thread(size_t n_threads = 1){
         std::vector<size_t> widths;
         std::vector<size_t> strides;
         std::vector<size_t> idxs;
-        // size_t N=4;
-        std::vector<std::vector<size_t>> thread_indxs = std::vector<std::vector<size_t>>(N);
 
 
         T* const start_ptr;
