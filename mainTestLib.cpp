@@ -783,6 +783,40 @@ void test_big_contaction_n_thread(){
     a.toc();
 }
 
+void test_big_multiplication_1_thread(){
+    set_thread();
+
+    tensor<int> t1(1000,1000), t2(1000, 1000);
+
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = 1;
+
+    auto i=new_index;
+    auto j=new_index;
+    auto k=new_index;
+
+    a.tic();
+    t2(i, k) = t1(i, j) * t1(k, j);
+    a.toc();
+}
+
+void test_big_multiplication_n_thread(){
+    set_thread(8);
+
+    tensor<int> t1(1000,1000), t2(1000, 1000);
+
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = 1;
+
+    auto i=new_index;
+    auto j=new_index;
+    auto k=new_index;
+
+    a.tic();
+    t2(i, k) = t1(i, j) * t1(k, j);
+    a.toc();
+}
+
 int main(){
     int n_test = 1;
 
@@ -889,6 +923,13 @@ int main(){
     test_big_contaction_1_thread();
     std::cout << "Test " << n_test << " parallel" << std::endl;
     test_big_contaction_n_thread();
+    n_test++;
+    std::cout << std::endl;
+
+    std::cout << "Test " << n_test << " sequential" << std::endl;
+    test_big_multiplication_1_thread();
+    std::cout << "Test " << n_test << " parallel" << std::endl;
+    test_big_multiplication_n_thread();
     n_test++;
     std::cout << std::endl;
 
