@@ -826,6 +826,58 @@ void test_great_matrix22_low_rank_n_thread(){
     tensor<int> t4 = t1(i,j) + t1(i,j);
 }
 
+void test_very_great_matrix22_low_rank_1_thread(){
+    set_thread();
+    tensor<int,rank<2>> t1(10000,10000);
+
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = 1;
+
+    auto i=new_index;
+    auto j=new_index;
+
+    tensor<int> t4 = t1(i,j) + t1(i,j);
+}
+
+void test_very_great_matrix22_low_rank_n_thread(){
+    set_thread(threads);
+    tensor<int,rank<2>> t1(10000,10000);
+
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = 1;
+
+    auto i=new_index;
+    auto j=new_index;
+
+    tensor<int> t4 = t1(i,j) + t1(i,j);
+}
+
+void test_6_great_matrix22_low_rank_1_thread(){
+    set_thread();
+    tensor<int,rank<2>> t1(10000,10000);
+
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = 1034;
+
+    auto i=new_index;
+    auto j=new_index;
+
+    tensor<int> t4 = t1(i,j) + t1(i,j) + t1(i,j);
+}
+
+void test_6_great_matrix22_low_rank_n_thread(){
+    set_thread(threads);
+    tensor<int,rank<2>> t1(10000,10000);
+
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = 102;
+
+    auto i=new_index;
+    auto j=new_index;
+
+    tensor<int> t4 = t1(i,j) + t1(i,j) + t1(i,j);
+}
+
 int main(){
     Test a{};
     a.add(test_indexlib, "test_indexlib");
@@ -865,6 +917,12 @@ int main(){
     a.add(test_great_matrix_low_rank_n_thread,"test_great_matrix_low_rank_n_thread");
     a.add(test_great_matrix22_low_rank_1_thread,"test_great_matrix22_low_rank_1_thread");
     a.add(test_great_matrix22_low_rank_n_thread,"test_great_matrix22_low_rank_n_thread");
+    a.add(test_very_great_matrix22_low_rank_1_thread,"test_very_great_matrix22_low_rank_1_thread");
+    a.add(test_very_great_matrix22_low_rank_n_thread,"test_very_great_matrix22_low_rank_n_thread");
+    a.add(test_6_great_matrix22_low_rank_1_thread,"test_6_great_matrix22_low_rank_1_thread");
+    a.add(test_6_great_matrix22_low_rank_n_thread,"test_6_great_matrix22_low_rank_n_thread");
 
-    a.launch_test(-1);
+    // a.launch_test(38);
+    a.launch_test(41);
+    a.launch_test(40);
 }

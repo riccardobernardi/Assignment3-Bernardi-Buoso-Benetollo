@@ -2,6 +2,7 @@
 #define EINSTEIN
 #include<map>
 #include <thread>
+#include "TestLib.h"
 
 namespace Tensor {
 /*
@@ -194,7 +195,7 @@ void set_thread(size_t n_threads = 1){
                     x.next();
                 }
             }else{
-                std::vector<std::thread> threads;
+                std::vector<std::thread> threads(N);
                 threads.reserve(N);
                 std::vector<std::vector<size_t>> thread_indxs = std::vector<std::vector<size_t>>(N);
 
@@ -225,15 +226,18 @@ void set_thread(size_t n_threads = 1){
                     tpos = old + span[i];
                 }
 
-                for(int i = 0; i < N; ++i){
-                    threads.emplace_back([this, &x](int span, std::vector<size_t> indxs){
-                        for(int k = 0; k< span; ++k) {
+                Tperf a;
+                a.tic();
+                for(int i = 0; i < N; ++i) {
+                    threads.at(i) = std::thread([this, &x](int span, std::vector<size_t> indxs) {
+                        //std::cout << "sto spawnando un thread" << std::endl;
+                        for (int k = 0; k < span; ++k) {
                             eval(indxs) += x.eval(indxs);
 
-                            unsigned index = indxs.size()-1;
+                            unsigned index = indxs.size() - 1;
                             ++indxs[index];
 
-                            while(indxs[index] == widths[index] && index>0) {
+                            while (indxs[index] == widths[index] && index > 0) {
                                 indxs[index] = 0;
                                 --index;
                                 ++indxs[index];
@@ -241,10 +245,15 @@ void set_thread(size_t n_threads = 1){
                         }
                     }, span[i], thread_indxs[i]);
                 }
+                a.toc();
+
 
                 for(auto & thread : threads){
+                    a.tic();
                     thread.join();
+                    a.toc();
                 }
+
             }
             std::cout << "number of threads: " << N << std::endl;
             return *this;

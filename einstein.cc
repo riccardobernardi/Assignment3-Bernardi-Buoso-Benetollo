@@ -1,5 +1,6 @@
 #include<iostream>
 #include"tensor.h"
+#include "TestLib.h"
 
 using namespace Tensor;
 
@@ -14,8 +15,10 @@ std::ostream & operator << (std::ostream& out, Index_Set<id, ids...>) {
 
 
 int main() {
+    set_thread(4);
+    Tperf a;
     //a bit of fun with the Index_Set library ;)
-    typedef Index_Set<2,3,5,3> myset;
+/*    typedef Index_Set<2,3,5,3> myset;
     std::cout << myset() << "-> " << index_count<myset>::value <<'\n';
 
     typedef non_repeat<myset>::set my_nonrepeat_set;
@@ -27,32 +30,35 @@ int main() {
                  is_same_nonrepeat<my_nonrepeat_set,Index_Set<5,3,2>>::value << "\n\n";
 
 
-    std::cout << merge<myset,set_diff<Index_Set<2,5,4,4>,my_nonrepeat_set>::type>::type() << "\n";
+    std::cout << merge<myset,set_diff<Index_Set<2,5,4,4>,my_nonrepeat_set>::type>::type() << "\n";*/
 
 ///*
 
     //testing Einstein notation
-    tensor<int,rank<2>> t1(2,2), t2(2,2);
+    tensor<int,rank<2>> t1(1000,1000), t2(1000,1000);
 
     int count=0;
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
-                *iter = count++;
-    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+                *iter = 1;
+    /*for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
                 std::cout << *iter << ' ';
     std::cout << '\n';
-
+*/
     //std::cout << "Qui funziona:)" << std::endl;
 
 
     auto i=new_index;
     auto j=new_index;
 
-    t2(j,i) = t1(i,j);
+    a.tic();
+    t2(i, j) = t1(i,j) + t1(i,j);
+    a.toc();
+
 
     //std::cout << "Qui non funziona:)" << std::endl;
 
 
-    for(auto iter=t2.begin(); iter!=t2.end(); ++iter)
+    /*for(auto iter=t2.begin(); iter!=t2.end(); ++iter)
                 std::cout << *iter << ' ';
     std::cout << '\n';
     //std::cout << "Qui non funziona:)" << std::endl;
@@ -92,6 +98,8 @@ int main() {
     tensor<int,rank<2>> t6=t3(i,j,k)*t4(j);
     for(auto iter=t6.begin(); iter!=t6.end(); ++iter)
                 std::cout << *iter << ' ';
-    std::cout << '\n';
+    std::cout << '\n';*/
 //*/
+
+
 }
