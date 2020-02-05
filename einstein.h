@@ -10,22 +10,23 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
 #define char_index(symb) CIndex<(#symb)[0]>()
 */
 
-int N = 1;
+    int N = 1;
 
-void set_thread(size_t n_threads = 1){
-    unsigned int max_n = std::thread::hardware_concurrency();
+    //function that given the number of thread, checks if it is legitimate and, if it isn't, rearranges it.
+    void set_thread(size_t n_threads = 1){
+        unsigned int max_n = std::thread::hardware_concurrency();
 
-    if(max_n == 0 or n_threads == 0){
-        N = 1;
+        if(max_n == 0 or n_threads == 0){
+            N = 1;
+        }
+        else if(n_threads <= max_n){
+            N = n_threads;
+        }
+        else{
+            std::cout << "Number of threads reduced to the maximum supported by the machine: " << max_n << std::endl;
+            N = max_n;
+        }
     }
-    else if(n_threads <= max_n){
-        N = n_threads;
-    }
-    else{
-        std::cout << "Number of threads reduced to the maximum supported by the machine: " << max_n << std::endl;
-        N = max_n;
-    }
-}
 
 
 //struct holding dynamic info about index (using an unsigned to guarantee as many indices as we want)
@@ -185,7 +186,7 @@ void set_thread(size_t n_threads = 1){
                 }
             }else{
                 std::vector<std::thread> threads;
-                std::vector<std::vector<size_t>> thread_indxs = std::vector<std::vector<size_t>>(N);
+                std::vector<std::vector<size_t>> thread_indxs = std::vector<std::vector<size_t>>(N); //contains at position i the index at which the i-th thread start to compute
 
                 size_t counter = 1;
                 for(auto w = widths.begin(); w != widths.end(); ++w){
@@ -210,9 +211,11 @@ void set_thread(size_t n_threads = 1){
                     }
 
                     threads.emplace_back(([this, &x](int span, std::vector<size_t> indxs){
+                        //create two PtrWrapper with the start index of the thread
                         auto p1 = PtrWrapper<T>(indxs);
                         auto p2 = PtrWrapper<T>(indxs);
 
+                        //set the pointers of the two PtrWrapper, in case x contain two subexpression set the children of its PtrWrapper
                         setPtr(p1);
                         x.setPtr(p2);
 
@@ -231,7 +234,7 @@ void set_thread(size_t n_threads = 1){
                     (*t).join();
                 }
             }
-            std::cout << "number of threads: " << N << std::endl;
+            std::cout << "Number of threads: " << N << std::endl;
             return *this;
         }
 

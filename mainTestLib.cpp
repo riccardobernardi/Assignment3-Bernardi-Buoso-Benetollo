@@ -9,7 +9,8 @@
 
 using namespace Tensor;
 
-int threads = 4;
+int threads = 8;
+Tperf a;
 
 std::ostream & operator << (std::ostream& out, Index_Set<>) { return out; }
 template<unsigned id, unsigned... ids>
@@ -18,51 +19,12 @@ std::ostream & operator << (std::ostream& out, Index_Set<id, ids...>) {
 }
 
 
-void test_indexlib(){
-    //a bit of fun with the Index_Set library ;)
-    typedef Index_Set<2,3,5,3> myset;
-    std::cout << myset() << "-> " << index_count<myset>::value <<'\n';
-}
-
-void test_nonrepeat(){
-    typedef Index_Set<2,3,5,3> myset;
-    typedef non_repeat<myset>::set my_nonrepeat_set;
-    std::cout << my_nonrepeat_set() << "-> " << index_count<my_nonrepeat_set>::value << "\n";
-}
-
-void test_diff(){
-    typedef Index_Set<2,3,5,3> myset;
-    typedef non_repeat<myset>::set my_nonrepeat_set;
-    typedef Index_Set<2,3,5,3> myset;
-    std::cout << set_diff<myset,my_nonrepeat_set>::type() << "\n";
-}
-
-void test_merge(){
-    typedef Index_Set<2,3,5,3> myset;
-    typedef non_repeat<myset>::set my_nonrepeat_set;
-
-    std::cout << is_same_nonrepeat<my_nonrepeat_set,Index_Set<5,2>>::value << ' ' <<
-              is_same_nonrepeat<my_nonrepeat_set,Index_Set<5,3,2>>::value << "\n\n";
-
-    std::cout << merge<myset,set_diff<Index_Set<2,5,4,4>,my_nonrepeat_set>::type>::type() << "\n";
-}
-
-void test_iter_tensor(){
-    //testing Einstein notation
-    tensor<int,rank<2>> t1(2,2), t2(2,2);
-
-    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
-        *iter = 1;
-    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
-        std::cout << *iter << ' ';
-    std::cout << '\n';
-}
-
 void test_invert_matrixes_1_thread(){
     tensor<int,rank<2>> t1(2,2), t2(2,2);
 
+    int count=0;
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
         std::cout << *iter << ' ';
     std::cout << '\n';
@@ -82,8 +44,9 @@ void test_invert_matrixes_n_threadss(){
     set_thread(threads);
     tensor<int,rank<2>> t1(2,2), t2(2,2);
 
+    int count=0;
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
         std::cout << *iter << ' ';
     std::cout << '\n';
@@ -100,14 +63,16 @@ void test_invert_matrixes_n_threadss(){
 }
 
 void test_sum_mult_op_1_threads(){
-    set_thread(2);
+    set_thread();
     tensor<int,rank<2>> t1(2,2);
     tensor<int> t3(2,2,2), t4(2);
 
+    int count=0;
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
+    count = 0;
     for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
 
 
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
@@ -135,10 +100,12 @@ void test_sum_mult_op_n_threads(){
     tensor<int,rank<2>> t1(2,2);
     tensor<int> t3(2,2,2), t4(2);
 
+    int count=0;
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
+    count = 0;
     for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
 
 
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
@@ -167,10 +134,12 @@ void test_subtract_mult_1_thread(){
     tensor<int> t3(2,2,2,2);
     tensor<int> t4(2,2);
 
+    int count=0;
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
+    count = 0;
     for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
 
 
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
@@ -199,10 +168,12 @@ void test_subtract_mult_4_thread(){
     tensor<int> t3(2,2,2,2);
     tensor<int> t4(2,2);
 
+    int count=0;
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
+    count = 0;
     for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
 
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
         std::cout << *iter << ' ';
@@ -228,10 +199,12 @@ void test_sum_2244_2442_1_thread(){
     set_thread();
     tensor<int> t1(2,2), t3(2,2,4,4), t4(2,4,4,2);
 
-    for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
-        *iter = 1;
-    for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
-        *iter = 1;
+    int count=0;
+    for(auto iter= t3.begin(); iter!=t3.end(); ++iter)
+        *iter = count++;
+    count = 0;
+    for(auto iter= t4.begin(); iter!=t4.end(); ++iter)
+        *iter = count++;
 
     auto i=new_index;
     auto j=new_index;
@@ -249,52 +222,12 @@ void test_sum_2244_2442_n_threads(){
     set_thread(threads);
     tensor<int> t1(2,2), t3(2,2,4,4), t4(2,4,4,2);
 
+    int count=0;
     for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
+    count = 0;
     for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
-        *iter = 1;
-
-    auto i=new_index;
-    auto j=new_index;
-    auto k=new_index;
-
-    t1(i,j) = t3(i,j,k,k)+t4(i,k,k,j);
-
-    std::cout << "here the result of [t1(i,j) = t3(i,j,k,k)+t4(i,k,k,j)];" << std::endl;
-    for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
-        std::cout << *iter << ' ';
-    std::cout << '\n';
-}
-
-void test_sum_2244_2442_smaller_1_thread(){
-    set_thread();
-    tensor<int> t1(2,2), t3(2,2,3,3), t4(2,3,3,2);
-
-    for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
-        *iter = 1;
-    for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
-        *iter = 1;
-
-    auto i=new_index;
-    auto j=new_index;
-    auto k=new_index;
-
-    t1(i,j) = t3(i,j,k,k)+t4(i,k,k,j);
-
-    std::cout << "here the result of [t1(i,j) = t3(i,j,k,k)+t4(i,k,k,j)];" << std::endl;
-    for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
-        std::cout << *iter << ' ';
-    std::cout << '\n';
-}
-
-void test_sum_2244_2442_smaller_n_threads(){
-    set_thread(threads);
-    tensor<int> t1(2,2), t3(2,2,3,3), t4(2,3,3,2);
-
-    for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
-        *iter = 1;
-    for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
 
     auto i=new_index;
     auto j=new_index;
@@ -312,8 +245,9 @@ void test_invert_indexes_mult_1_thread(){
     set_thread();
     tensor<int,rank<2>> t1(2,2), t2(2,2);
 
+    int count = 0;
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
 
     auto i=new_index;
     auto j=new_index;
@@ -331,8 +265,9 @@ void test_invert_indexes_mult_n_threads(){
     set_thread(threads);
     tensor<int,rank<2>> t1(2,2), t2(2,2);
 
+    int count = 0;
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
 
     auto i=new_index;
     auto j=new_index;
@@ -352,10 +287,12 @@ void test_mult_all_ranked_1_thread(){
     tensor<int,rank<3>> t3(2,2,2);
     tensor<int,rank<1>> t4(2);
 
+    int count=0;
     for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
+    count = 0;
     for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
 
     auto i=new_index;
     auto j=new_index;
@@ -375,10 +312,12 @@ void test_mult_all_ranked_n_threads(){
     tensor<int,rank<3>> t3(2,2,2);
     tensor<int,rank<1>> t4(2);
 
+    int count=0;
     for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
+    count = 0;
     for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
 
     auto i=new_index;
     auto j=new_index;
@@ -394,7 +333,7 @@ void test_mult_all_ranked_n_threads(){
 
 void test_simple_assignment_1_thread(){
     set_thread();
-    tensor<int,rank<2>> t1(2,2), t2(2,2);
+    tensor<int,rank<2>> t1(2,2);
     tensor<int> t5(2,2); // if it was tensor<int,rank<2>> it was wrong, why? // because it have to be assigned in that moment
 
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
@@ -454,10 +393,12 @@ void test_simple_mult_222_2_n_threads(){
     set_thread(threads);
     tensor<int> t3(2,2,2), t4(2);
 
+    int count=0;
     for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
+    count=0;
     for(auto iter=t4.begin(); iter!=t4.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
 
     auto i=new_index;
     auto j=new_index;
@@ -475,17 +416,19 @@ void test_very_long_mult_1_thread(){
     tensor<int,rank<2>> t1(2,2), t2(2,2);
     tensor<int> t6(2);
 
+    int count = 0;
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
+    count = 0;
     for(auto iter=t2.begin(); iter!=t2.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
 
     auto i=new_index;
     auto j=new_index;
     auto k=new_index;
 
     t6(k)=t1(k,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i);
-    std::cout << "here the result of [t6=t1(i,i)*t2(j,j)];" << std::endl;
+    std::cout << "here the result of [t6(k)=t1(k,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)];" << std::endl;
     for(auto iter=t6.begin(); iter!=t6.end(); ++iter)
         std::cout << *iter << ' ';
     std::cout << '\n';
@@ -496,54 +439,22 @@ void test_very_long_mult_n_thread(){
     tensor<int,rank<2>> t1(2,2), t2(2,2);
     tensor<int> t6(2);
 
+    int count = 0;
     for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
+    count = 0;
     for(auto iter=t2.begin(); iter!=t2.end(); ++iter)
-        *iter = 1;
+        *iter = count++;
 
     auto i=new_index;
     auto j=new_index;
     auto k=new_index;
 
     t6(k)=t1(k,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i);
-    std::cout << "here the result of [t6=t1(i,i)*t2(j,j)];" << std::endl;
+    std::cout << "here the result of [t6(k)=t1(k,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)];" << std::endl;
     for(auto iter=t6.begin(); iter!=t6.end(); ++iter)
         std::cout << *iter << ' ';
     std::cout << '\n';
-}
-
-void test_mega_sum_1_threads(){
-    set_thread();
-    tensor<int,rank<5>> t1(2,2,8,200,100);
-    tensor<int,rank<4>> t3(2,2,8,9);
-
-    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
-        *iter = 1;
-    for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
-        *iter = 1;
-
-    auto i=new_index;
-    auto j=new_index;
-    auto k=new_index;
-
-    tensor<int> t4 = t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k);
-}
-
-void test_mega_sum_n_threads(){
-    set_thread(threads);
-    tensor<int,rank<5>> t1(2,2,8,200,100);
-    tensor<int,rank<4>> t3(2,2,8,9);
-
-    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
-        *iter = 1;
-    for(auto iter=t3.begin(); iter!=t3.end(); ++iter)
-        *iter = 1;
-
-    auto i=new_index;
-    auto j=new_index;
-    auto k=new_index;
-
-    tensor<int> t4 = t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k)+t3(i,j,k,k)+t1(i,j,k,k,k);
 }
 
 void test_very_long_mult_1_thread_second_try(){
@@ -561,7 +472,7 @@ void test_very_long_mult_1_thread_second_try(){
     auto k=new_index;
 
     t6(k)=t1(k,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i);
-    std::cout << "here the result of [t6=t1(i,i)*t2(j,j)];" << std::endl;
+    std::cout << "here the result;" << std::endl;
     for(auto iter=t6.begin(); iter!=t6.end(); ++iter)
         std::cout << *iter << ' ';
     std::cout << '\n';
@@ -582,7 +493,7 @@ void test_very_long_mult_n_thread_second_try(){
     auto k=new_index;
 
     t6(k)=t1(k,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i);
-    std::cout << "here the result of [t6=t1(i,i)*t2(j,j)];" << std::endl;
+    std::cout << "here the result;" << std::endl;
     for(auto iter=t6.begin(); iter!=t6.end(); ++iter)
         std::cout << *iter << ' ';
     std::cout << '\n';
@@ -644,6 +555,7 @@ void test_mega_sum_1_threads_second_try(){
     auto j=new_index;
     auto k=new_index;
 
+    a.tic();
     tensor<int> t4 = t3(i,j,k,k)
                      +t1(i,j,k,k,k)
                      +t3(i,j,k,k)
@@ -700,6 +612,7 @@ void test_mega_sum_1_threads_second_try(){
                      +t1(i,j,k,k,k)
                      +t3(i,j,k,k)
                      +t1(i,j,k,k,k);
+    a.toc();
 }
 
 void test_mega_sum_n_threads_second_try(){
@@ -716,6 +629,7 @@ void test_mega_sum_n_threads_second_try(){
     auto j=new_index;
     auto k=new_index;
 
+    a.tic();
     tensor<int> t4 = t3(i,j,k,k)
                      +t1(i,j,k,k,k)
                      +t3(i,j,k,k)
@@ -772,6 +686,7 @@ void test_mega_sum_n_threads_second_try(){
                      +t1(i,j,k,k,k)
                      +t3(i,j,k,k)
                      +t1(i,j,k,k,k);
+    a.toc();
 }
 
 void test_great_matrix_low_rank_1_thread(){
@@ -784,7 +699,9 @@ void test_great_matrix_low_rank_1_thread(){
     auto i=new_index;
     auto j=new_index;
 
+    a.tic();
     tensor<int> t4 = t1(i,i,j) + t1(i,i,j);
+    a.toc();
 }
 
 void test_great_matrix_low_rank_n_thread(){
@@ -797,7 +714,9 @@ void test_great_matrix_low_rank_n_thread(){
     auto i=new_index;
     auto j=new_index;
 
+    a.tic();
     tensor<int> t4 = t1(i,i,j) + t1(i,i,j);
+    a.toc();
 }
 
 void test_great_matrix22_low_rank_1_thread(){
@@ -810,7 +729,9 @@ void test_great_matrix22_low_rank_1_thread(){
     auto i=new_index;
     auto j=new_index;
 
+    a.tic();
     tensor<int> t4 = t1(i,j) + t1(i,j);
+    a.toc();
 }
 
 void test_great_matrix22_low_rank_n_thread(){
@@ -823,48 +744,152 @@ void test_great_matrix22_low_rank_n_thread(){
     auto i=new_index;
     auto j=new_index;
 
+    a.tic();
     tensor<int> t4 = t1(i,j) + t1(i,j);
+    a.toc();
+}
+
+void test_big_contaction_1_thread(){
+    set_thread();
+
+    tensor<int> t1(1000,1000,1000), t2(1000);
+
+    int count=0;
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = 1;
+
+    auto i=new_index;
+    auto j=new_index;
+
+    a.tic();
+    t2(i) = t1(i,j,j);
+    a.toc();
+}
+
+void test_big_contaction_n_thread(){
+    set_thread(8);
+
+    tensor<int> t1(1000,1000,1000), t2(1000);
+
+    int count=0;
+    for(auto iter=t1.begin(); iter!=t1.end(); ++iter)
+        *iter = 1;
+
+    auto i=new_index;
+    auto j=new_index;
+
+    a.tic();
+    t2(i) = t1(i,j,j);
+    a.toc();
 }
 
 int main(){
-    Test a{};
-    a.add(test_indexlib, "test_indexlib");
-    a.add(test_nonrepeat, "test_nonrepeat");
-    a.add(test_sum_2244_2442_1_thread, "test_sum_2244_2442_1_thread");
-    a.add(test_sum_2244_2442_n_threads,"test_sum_2244_2442_n_threads");
-    a.add(test_diff, "test_diff");
-    a.add(test_merge, "test_merge");
-    a.add(test_iter_tensor, "test_iter_tensor");
-    a.add(test_invert_matrixes_1_thread, "test_invert_matrixes_1_thread");
-    a.add(test_invert_matrixes_n_threadss,"test_invert_matrixes_n_threadss");
-    a.add(test_sum_mult_op_1_threads, "test_sum_mult_op_1_threads");
-    a.add(test_sum_mult_op_n_threads, "test_sum_mult_op_n_threads");
-    a.add(test_subtract_mult_1_thread, "test_subtract_mult_1_thread");
-    a.add(test_subtract_mult_4_thread, "test_subtract_mult_4_thread");
-    a.add(test_invert_indexes_mult_1_thread, "test_invert_indexes_mult_1_thread");
-    a.add(test_invert_indexes_mult_n_threads,"test_invert_indexes_mult_n_threads");
-    a.add(test_sum_2244_2442_smaller_1_thread, "test_sum_2244_2442_smaller_1_thread");
-    a.add(test_sum_2244_2442_smaller_n_threads,"test_sum_2244_2442_smaller_n_threads");
-    a.add(test_mult_all_ranked_1_thread, "test_mult_all_ranked_1_thread");
-    a.add(test_mult_all_ranked_n_threads,"test_mult_all_ranked_n_threads");
-    a.add(test_simple_assignment_1_thread, "test_simple_assignment_1_thread");
-    a.add(test_simple_assignment_n_threads,"test_simple_assignment_n_threads");
-    a.add(test_simple_mult_222_2_1_thread, "test_simple_mult_222_2_1_thread");
-    a.add(test_simple_mult_222_2_n_threads,"test_simple_mult_222_2_n_threads");
-    a.add(test_mega_sum_1_threads,"test_mega_sum_1_threads");
-    a.add(test_mega_sum_n_threads,"test_mega_sum_n_threads");
-    a.add(test_very_long_mult_1_thread, "test_very_long_mult_1_thread");
-    a.add(test_very_long_mult_n_thread, "test_very_long_mult_n_thread");
-    a.add(test_very_long_mult_1_thread_second_try, "test_very_long_mult_1_thread_second_try");
-    a.add(test_very_long_mult_n_thread_second_try, "test_very_long_mult_n_thread_second_try");
-    a.add(test_very_long_mult_1_thread_third_try, "test_very_long_mult_1_thread_third_try");
-    a.add(test_very_long_mult_n_thread_third_try, "test_very_long_mult_n_thread_third_try");
-    a.add(test_mega_sum_1_threads_second_try,"test_mega_sum_1_threads_second_try");
-    a.add(test_mega_sum_n_threads_second_try,"test_mega_sum_n_threads_second_try");
-    a.add(test_great_matrix_low_rank_1_thread,"test_great_matrix_low_rank_1_thread");
-    a.add(test_great_matrix_low_rank_n_thread,"test_great_matrix_low_rank_n_thread");
-    a.add(test_great_matrix22_low_rank_1_thread,"test_great_matrix22_low_rank_1_thread");
-    a.add(test_great_matrix22_low_rank_n_thread,"test_great_matrix22_low_rank_n_thread");
+    int n_test = 1;
 
-    a.launch_test(-1);
+    std::cout << "Test " << n_test << " sequential" << std::endl;
+    test_invert_matrixes_1_thread();
+    std::cout << "Test " << n_test << " parallel" << std::endl;
+    test_invert_matrixes_n_threadss();
+    n_test++;
+    std::cout << std::endl;
+
+
+    std::cout << "Test " << n_test << " sequential" << std::endl;
+    test_sum_mult_op_1_threads();
+    std::cout << "Test " << n_test << " parallel" << std::endl;
+    test_sum_mult_op_n_threads();
+    n_test++;
+    std::cout << std::endl;
+
+    std::cout << "Test " << n_test << " sequential" << std::endl;
+    test_subtract_mult_1_thread();
+    std::cout << "Test " << n_test << " parallel" << std::endl;
+    test_subtract_mult_4_thread();
+    n_test++;
+    std::cout << std::endl;
+
+    std::cout << "Test " << n_test << " sequential" << std::endl;
+    test_invert_indexes_mult_1_thread();
+    std::cout << "Test " << n_test << " parallel" << std::endl;
+    test_invert_indexes_mult_n_threads();
+    n_test++;
+    std::cout << std::endl;
+
+    std::cout << "Test " << n_test << " sequential" << std::endl;
+    test_sum_2244_2442_1_thread();
+    std::cout << "Test " << n_test << " parallel" << std::endl;
+    test_sum_2244_2442_n_threads();
+    n_test++;
+    std::cout << std::endl;
+
+    std::cout << "Test " << n_test << " sequential" << std::endl;
+    test_mult_all_ranked_1_thread();
+    std::cout << "Test " << n_test << " parallel" << std::endl;
+    test_mult_all_ranked_n_threads();
+    n_test++;
+    std::cout << std::endl;
+
+    std::cout << "Test " << n_test << " sequential" << std::endl;
+    test_simple_assignment_1_thread();
+    std::cout << "Test " << n_test << " parallel" << std::endl;
+    test_simple_assignment_n_threads();
+    n_test++;
+    std::cout << std::endl;
+
+    std::cout << "Test " << n_test << " sequential" << std::endl;
+    test_simple_mult_222_2_1_thread();
+    std::cout << "Test " << n_test << " parallel" << std::endl;
+    test_simple_mult_222_2_n_threads();
+    n_test++;
+    std::cout << std::endl;
+
+    std::cout << "Test " << n_test << " sequential" << std::endl;
+    test_very_long_mult_1_thread();
+    std::cout << "Test " << n_test << " parallel" << std::endl;
+    test_very_long_mult_n_thread();
+    n_test++;
+    std::cout << std::endl;
+
+    std::cout << "Test " << n_test << " sequential" << std::endl;
+    test_very_long_mult_1_thread_second_try();
+    std::cout << "Test " << n_test << " parallel" << std::endl;
+    test_very_long_mult_n_thread_second_try();
+    n_test++;
+    std::cout << std::endl;
+
+    std::cout << "Test " << n_test << " sequential" << std::endl;
+    test_very_long_mult_1_thread_third_try();
+    std::cout << "Test " << n_test << " parallel" << std::endl;
+    test_very_long_mult_n_thread_third_try();
+    n_test++;
+    std::cout << std::endl;
+
+    std::cout << "Test " << n_test << " sequential" << std::endl;
+    test_mega_sum_1_threads_second_try();
+    std::cout << "Test " << n_test << " parallel" << std::endl;
+    test_mega_sum_n_threads_second_try();
+    n_test++;
+    std::cout << std::endl;
+
+    std::cout << "Test " << n_test << " sequential" << std::endl;
+    test_great_matrix_low_rank_1_thread();
+    std::cout << "Test " << n_test << " parallel" << std::endl;
+    test_great_matrix_low_rank_n_thread();
+    n_test++;
+    std::cout << std::endl;
+
+    std::cout << "Test " << n_test << " sequential" << std::endl;
+    test_great_matrix22_low_rank_1_thread();
+    std::cout << "Test " << n_test << " parallel" << std::endl;
+    test_great_matrix22_low_rank_n_thread();
+    n_test++;
+    std::cout << std::endl;
+
+    std::cout << "Test " << n_test << " sequential" << std::endl;
+    test_big_contaction_1_thread();
+    std::cout << "Test " << n_test << " parallel" << std::endl;
+    test_big_contaction_n_thread();
+    n_test++;
+    std::cout << std::endl;
+
 }
