@@ -20,11 +20,6 @@
 
 ## 1 Introduction and general structure
 
-- description of the library given from the professor
-- parsing tree build
-- description of the problem
-- Tools used, testing library, thread library
-
 This report describes the solution we ha have found of the thrid assignment about the parallelisation of addition, subtraction and contraction on tensors. We started from the solution provided by the professor and we noticed that the library was implemented to build a parsing tree of the Einstein expression given as input. The base class is 
 
 ```c++
@@ -59,8 +54,6 @@ As we can see in the code above, operations are performed iteratively calling th
 The **eval** function actually access data and is used in all of the classes involved in the operations, but slightly differs between them, depending one the mathematical operation to be performed.
 The **next** function updates the pointer to data that will be accessed by eval funtion by increasing the values of the current pointer and the index of the proxy tensor (with the respect of the bounds).
 Theese are the core operations that we want to perform in parallel, so we need to coordinate multiple access to the pointer in order to resolve race condition and avoid access to the same location.
-
-- explain better why threading is here
 
 ### 2.2 After
 
@@ -185,7 +178,7 @@ T eval(std::vector<size_t> indxs) {
 
 Since we really wanted to improve the performances we approached the problem in a different way. The main problem up to us was that every time the new eval was called it has to start from the start_ptr, to avoid racce conditions, of the expression and iterate to the pointer that correspond to the index given as input. We thought that passing a more complex object to the **eval** function that embedded the pointer and increments it without generating race conditions.
 
-For this purpose we create an object called **PtrWrapper** (friend class of einstein_expression) that mantain the index of the cell to point, the pointer in case the expression is contain only by one proxy tensors (in our case the right element of the move oprator), and two shared pointer child1 and child2 that point to two other PtrWrapper in case the expression is coposed by two subexpressions (for example if we have a multiplication).
+For this purpose we create an object called **PtrWrapper** (friend class of einstein_expression) that mantain the index of the cell to point, the pointer in case the expression is contain only by one proxy tensors (in our case the right element of the move oprator), and two shared pointer child1 and child2 that point to two other PtrWrapper in case the expression is composed by two subexpressions (for example if we have a multiplication).
 
 ```c++
 //wrapper class that contain the current index and current value of an expression
@@ -234,8 +227,8 @@ The function **setPtr()** intialize the pointer of PtrWrapper to the position gi
 
 ### 3.1 PtrWrapper in different expressions
 
-When the expression is composed by two subexpressions (multiplication, addition, subtraction), the new eval takes as input a PtrWrapper and compute return the result of the operation between the eval() of the two child of the PtrWrapper given as input.
-In the same way, the new next() function copute two next() that take as input the two child of the PtrWrapper given as input.
+When the expression is composed by two subexpressions (multiplication, addition, subtraction), the new eval takes as input a PtrWrapper and compute the result of the operation between the eval() of the two child of the PtrWrapper given as input.
+In the same way, the new next() function compute two next() that take as input the two child of the PtrWrapper given as input.
 
 The main difference shows up in the setPtr() function in which we assign to child1 and child2 two new shared pointer to new PtrWrapper object, and then we call the setPtr() on the two child for the respective subexpression.
 
@@ -276,8 +269,8 @@ Some of the measure that we gained are summarised here below:
 
 | Sequential              | Sequential            | Concurrent | Concurrent             | Improved? | PtrWrapper? |
 | ----------------------- | --------------------- | ---------- | ---------------------- | --------- | ----------- |
-| Test 34, 1000x1000x1000 | 246sec / 246327362 µs | Test 35    | 240 sec : 240171331 µs | Yes       | No          |
-| Test 36, 4000x4000      | 4 sec : 4521288 µs    | Test 37    | 7 sec : 7599215 µs     | No        | No          |
+| Test 34, 1000x1000x1000 | 246sec / 246327362 µs | Test 35    | 240 sec / 240171331 µs | Yes       | No          |
+| Test 36, 4000x4000      | 4 sec / 4521288 µs    | Test 37    | 3 sec                  | No        | Yes         |
 | Test 24, hundred sums   | 500ms                 | Test 25    | 475ms                  | Yes       | Yes         |
 
 Many other tests were perfromed but only on few cases there were a perceptible improvement.
@@ -285,3 +278,7 @@ Many other tests were perfromed but only on few cases there were a perceptible i
 The testa are conducted by the mean of a library developed during this course by a team of students and it can be found at https://github.com/riccardobernardi/TestLib, it was developed by Bernardi, Cecchini, Cazzaro, Zanatta, Buoso, Benetollo.
 
 ## 5 Conclusion and further development
+
+In conclusions we can say that the intial sequential version of the library is already pretty optimized in terms of performance, so that for operations between small tensors we cannot see so much difference, we can get a considerable improvement only if we perform operations between tensors that has great dimensions. 
+
+One further development could be using better performing library for multithreading instead the standard thread (i.e. boost).
