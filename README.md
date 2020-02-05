@@ -20,7 +20,7 @@
 
 ## 1 Introduction and general structure
 
-This report describes the solution we ha have found of the third assignment about the parallelisation of addition, subtraction and contraction on tensors. We started from the solution provided by the professor and we noticed that the library was implemented to build a parsing tree of the Einstein expression given as input. The base class is 
+This report describes the solution we ha have found of the third assignment about the parallelization of addition, subtraction and contraction on tensors. We started from the solution provided by the professor and we noticed that the library was implemented to build a parsing tree of the Einstein expression given as input. The base class is 
 
 ```c++
 template<typename T> class einstein_expression<T,dynamic,einstein_proxy>
@@ -50,14 +50,14 @@ while(!end()) {
     x.next();
 }
 ```
-As we can see in the code above, operations are performed iteratively calling the functions eval and next, which respectively write in the new expression and update the current pointer to data.
-The **eval** function actually access data and is used in all of the classes involved in the operations, but slightly differs between them, depending one the mathematical operation to be performed.
+As we can see in the code above, operations are performed iterative calling the functions eval and next, which respectively write in the new expression and update the current pointer to data.
+The **eval** function actually access data and is used in all the classes involved in the operations, but slightly differs between them, depending on the mathematical operation to be performed.
 The **next** function updates the pointer to data that will be accessed by eval function by increasing the values of the current pointer and the index of the proxy tensor (with the respect of the bounds).
 These are the core operations that we want to perform in parallel, so we need to coordinate multiple access to the pointer in order to resolve race condition and avoid access to the same location.
 
 ### 2.2 After
 
-Before start executing the expressions, we permit to the user to choose the number of thread that he want to use for parallelize the different operations. The function check if the number of thread given in input is at least equal to 1, otherwise set it to 1, and less then the maximum number of threads that the machine can support, otherwise set it to the max number of threads.
+Before start executing the expressions, we permit to the user to choose the number of thread that he want to use for parallelize the different operations. The function check if the number of thread given in input is at least equal to 1, otherwise set it to 1, and less than the maximum number of threads that the machine can support, otherwise set it to the max number of threads.
 
 ```c++
 void set_thread(size_t n_threads = 1){
@@ -95,13 +95,13 @@ T& eval(std::vector<size_t> indxs) const {
 ```
 After calling this new eval, index is incremented by one with the respect of the bounds.
 
-From our previous experience we know that to parallelise matrix operations you have to split the matrix in N_THREADS parts that are independent and only then launching threads on them. This part of the code in the move was the part of the code that seems to necessitate this kind of improvement since inside it is performed a sum between the resulting tensor and the right-expression of the move operator.
+From our previous experience we know that to parallelize matrix operations you have to split the matrix in N_THREADS parts that are independent and only then launching threads on them. This part of the code in the move was the part of the code that seems to necessitate this kind of improvement since inside it is performed a sum between the resulting tensor and the right-expression of the move operator.
 
-The move assignment operator was also modified but we are going only to describe how it works from an abstract point of view, to understand more about it we advise to check the code attached.
+The move assignment operator was also modified, but we are going only to describe how it works from an abstract point of view, to understand more about it we advise to check the code attached.
 
-The move checks if the N_THREADS is set to 1 and in this case the code that is run is the one provided by the initial library, instead if the number is larger then 1, the code behave to parallelize the operations.
+The move checks if the N_THREADS is set to 1 and in this case the code that is run is the one provided by the initial library, instead if the number is larger then 1, the code behave to parallelise the operations.
 
-At first we calculate the vector span, that contains at position i the number of cell that the i-th thread should elaborate.
+At first, we calculate the vector span, that contains at position i the number of cell that the i-th thread should elaborate.
 ```c++
 size_t counter = 1;
 for(auto w = widths.begin(); w != widths.end(); ++w){
@@ -131,9 +131,9 @@ for(int i = 0; i < N; ++i){
     tpos = old + span[i];
 }
 ```
- This last fact is peculiar and it is because we cannot store and pass a vector of pointer, because x could be composed by several subexpression with several pointers, for this reason we have to pass the tensor index, then the new **eval** of every einstein expression will compute the right position using the own's strides, it means that doing this way we are guaranteed that every tensor computes the right position without generating a race condition.
+ This last fact is peculiar and it is because we cannot store and pass a vector of pointer, because x could be composed by several subexpression with several pointers, for this reason we have to pass the tensor index, then the new **eval** of every einstein expression will compute the right position using the owns strides, it means that doing this way we are guaranteed that every tensor computes the right position without generating a race condition.
 
-After this preamble comes the core of our implementation that launches a lambda that as parameters take the span(number of cells to be computed) and the starting index assigned to that precise thread, furthermore we pass in the closure also the **this** and the **x**. Every threads cycles **span** times to compute all assigned cells calling the **eval** on the **this** and on the **x** and moving the current index of one position forward. After incrementing the current index it is checked that it respects the bounds imposed by the **widths** of the tensor.
+After this preamble comes the core of our implementation that launches a lambda that as parameters take the span(number of cells to be computed) and the starting index assigned to that precise thread, furthermore we pass in the closure also the **this** and the **x**. Every threads cycle **span** times to compute all assigned cells calling the **eval** on the **this** and on the **x** and moving the current index of one position forward. After incrementing the current index it is checked that it respects the bounds imposed by the **widths** of the tensor.
 ```c++
 threads.emplace_back(([this, &x](int span, std::vector<size_t> indxs){
     for(int k = 0; k< span; ++k) {
@@ -154,7 +154,7 @@ At the end all the threads are caught by a **join**.
 
 ### 2.2.1 Eval in different expressions
 
-We could have different cases of expression on which the eval can be computed, in every case, like the basic case, the function take as input the an index vector and return a T object.
+We could have different cases of expression on which the eval can be computed, in every case, like the basic case, the function take as input the index vector and return a T object.
 
 In the case of multiplication we execute the eval on each factor and then return their product.
 ```c++
@@ -178,7 +178,7 @@ T eval(std::vector<size_t> indxs) {
 
 Since we really wanted to improve the performances we approached the problem in a different way. The main problem up to us was that every time the new eval was called it has to start from the start_ptr, to avoid race conditions, of the expression and iterate to the pointer that correspond to the index given as input. We thought that passing a more complex object to the **eval** function that embedded the pointer and increments it without generating race conditions.
 
-For this purpose we create an object called **PtrWrapper** (friend class of einstein_expression) that maintain the index of the cell to point, the pointer in case the expression is contain only by one proxy tensors (in our case the right element of the move operator), and two shared pointer child1 and child2 that point to two other PtrWrapper in case the expression is composed by two sub-expressions (for example if we have a multiplication).
+For this purpose we create an object called **PtrWrapper** (friend class of einstein_expression) that maintain the index of the cell to point, the pointer to the data, in case the expression contains only by one proxy tensors (in our case the right element of the move operator), and two shared pointer child1 and child2 that point to two other PtrWrapper in case the expression is composed by two sub-expressions (for example if we have a multiplication).
 
 ```c++
 //wrapper class that contain the current index and current value of an expression
@@ -223,7 +223,7 @@ threads.emplace_back(([this, &x](int span, std::vector<size_t> indxs){
 }), span[i], thread_indxs[i]);
 ```
 
-The function **setPtr()** intialize the pointer of PtrWrapper to the position given by the index takes as input by the constructor. This function, as in the previous implementation, prevents race conditions because starts from a copy of start_ptr and increment it since obtaining the correct value.
+The function **setPtr()** initialize the pointer of PtrWrapper to the position given by the index takes as input by the constructor. This function, as in the previous implementation, prevents race conditions because starts from a copy of start_ptr and increment it since obtaining the correct value.
 
 ```c++
 void setPtr(PtrWrapper<T>& p) const{
@@ -235,14 +235,14 @@ void setPtr(PtrWrapper<T>& p) const{
 }
 ```
 
-The solution obtained by using PtrWrapper has better performances then the previous since the eval function directly return the data pointed by the pointer contained in the PtrWrapper object without calculating it each time the function is called, and the increment of this pointer doesn't introduce overhead because it's done in parallel with the increment of the index.
+The solution obtained by using PtrWrapper has better performances than the previous since the eval function directly return the data pointed by the pointer contained in the PtrWrapper object without calculating it each time the function is called, and the increment of this pointer doesn't introduce overhead because it's done in parallel with the increment of the index.
 
 ### 3.1 PtrWrapper in different expressions
 
 When the expression is composed by two sub-expressions (multiplication, addition, subtraction), the new eval takes as input a PtrWrapper and compute the result of the operation between the eval() of the two child of the PtrWrapper given as input.
 In the same way, the new next() function compute two next() that take as input the two child of the PtrWrapper given as input.
 
-The main difference shows up in the setPtr() function in which we assign to child1 and child2 two new shared pointer to new PtrWrapper object, and then we call the setPtr() on the two child for the respective subexpression.
+The main difference shows up in the setPtr() function in which we assign to child1 and child2 two new shared pointers to new PtrWrapper object, and then we call the setPtr() on the two child for the respective subexpression.
 
 ```c++
 void setPtr(PtrWrapper<T>& p) const{
@@ -258,9 +258,9 @@ With this implementation we build a tree of PtrWrappers with their children that
 
 ## 4 Performances
 
-We have measured all the performances at every test and we have noticed that only a small improvement was introduced by the mean of the multi-threading. So we tried to add some tests with a lower number of rank but many thousands of cells for every index. At this point the improvement becomes visible and very effective.
+We have measured all the performances at every test, and we have noticed that only a small improvement was introduced by the mean of the multi-threading. So we tried to add some tests with a lower number of rank but many thousands of cells for every index. At this point the improvement becomes visible and very effective.
 
-We also decided to go deeper into the possible operations that could perform better exploiting the threads regardless of the multi-threading overhead. We tried so to produce big tensors of low rank. We ended up discovering that with a rank 3 tensor with dimensions <1000,1000,1000> summed for itself our multi-threaded version can perform more then twice better with respect to the sequential version.
+We also decided to go deeper into the possible operations that could perform better exploiting the threads regardless of the multi-threading overhead. We tried so to produce big tensors of low rank. We ended up discovering that with a rank 3 tensor with dimensions <1000,1000,1000> summed for itself our multi-threaded version can perform more than twice better with respect to the sequential version.
 
 An example of the tests we tried is here below:
 
@@ -293,6 +293,6 @@ Many other tests were performed but the most significant were presented.
 
 ## 5 Conclusion and further development
 
-In conclusions we can say that the initial sequential version of the library is already pretty optimized in terms of performance, so that for operations between small tensors we cannot see so much difference, we can get a considerable improvement only if we perform operations between tensors that has great dimensions. 
+In conclusions, we can say that the initial sequential version of the library is already pretty optimized in terms of performance, so that for operations between small tensors we cannot see so much difference, we can get a considerable improvement only if we perform operations between tensors that has great dimensions. 
 
 One further development could be using better performing library for multi-threading instead the standard thread (i.e. boost).
