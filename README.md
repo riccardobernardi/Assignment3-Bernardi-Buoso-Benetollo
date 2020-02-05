@@ -261,21 +261,21 @@ void test_great_matrix_low_rank_n_thread(){
     auto i=new_index;
     auto j=new_index;
 
+    a.tic();
     tensor<int> t4 = t1(i,i,j) + t1(i,i,j);
+    a.toc();
 }
 ```
 
 Some of the measure that we gained are summarised here below:
 
-| Sequential              | Sequential            | Concurrent | Concurrent             | Improved? | PtrWrapper? |
-| ----------------------- | --------------------- | ---------- | ---------------------- | --------- | ----------- |
-| Test 34, 1000x1000x1000 | 246sec / 246327362 µs | Test 35    | 240 sec / 240171331 µs | Yes       | No          |
-| Test 36, 4000x4000      | 4 sec / 4521288 µs    | Test 37    | 3 sec                  | No        | Yes         |
-| Test 24, hundred sums   | 500ms                 | Test 25    | 475ms                  | Yes       | Yes         |
+| Test              | Operation             | Sequential            | Concurrent             |
+| ----------------------- | --------------------- | --------------------- | ---------------------- |
+|  test_great_matrix_low_rank, 1000x1000x1000 | addition              | 52 ms : 52353 µs      | 19 ms : 19420 µs       |
+| test_big_contaction, 1000x1000x1000 | contaction            | 139 ms : 139763 µs    | 15 ms : 15260 µs       |
+| test_big_multiplication, 4000x4000      | mutiplication         | 52 sec : 52813747 µs  | 25 sec : 25164497 µs   |
 
 Many other tests were perfromed but only on few cases there were a perceptible improvement.
-
-The testa are conducted by the mean of a library developed during this course by a team of students and it can be found at https://github.com/riccardobernardi/TestLib, it was developed by Bernardi, Cecchini, Cazzaro, Zanatta, Buoso, Benetollo.
 
 ## 5 Conclusion and further development
 
