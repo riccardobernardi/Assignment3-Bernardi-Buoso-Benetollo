@@ -300,7 +300,7 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
 
         T& eval() { return *current_ptr; }
 
-        void setPtr(PtrWrapper<T>& p) const{
+        void setPtr(PtrWrapper<T>& p) const{    //function that initializes the pointer contained in PtrWrapper to the data corresponding to the index of its respective thread_index
             p.ptr = start_ptr;
 
             for(int i = strides.size() - 1; i >= 0; --i){
@@ -461,14 +461,14 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
             exp2.next();
         }
 
-        void next(PtrWrapper<T>& p) {
+        void next(PtrWrapper<T>& p) {   //increment the pointers and the indexes of the children of the PtrWrapper which refer to the subexpressions
             exp1.next( *(p.child1) );
             exp2.next( *(p.child2) );
         }
 
         T eval() { return exp1.eval() * exp2.eval(); }
 
-        void setPtr(PtrWrapper<T>& p) const{
+        void setPtr(PtrWrapper<T>& p) const{ //function that initializes the children of the PtrWrapper with two other PtrWrappers which refer to the subexpressions
             p.child1 = std::make_shared<PtrWrapper<T>>( PtrWrapper<T>( p.idx ) );
             p.child2 = std::make_shared<PtrWrapper<T>>( PtrWrapper<T>( p.idx ) );
 
@@ -601,7 +601,7 @@ template<char C> struct CIndex { static constexpr char symbol=C; };
             exp2.next( *(p.child2) );
         }
 
-        void setPtr(PtrWrapper<T>& p) const{
+        void setPtr(PtrWrapper<T>& p) const{ //function that initializes the children of the PtrWrapper with two other PtrWrappers which refer to the subexpressions
             p.child1 = std::make_shared<PtrWrapper<T>>( PtrWrapper<T>( p.idx ) );
             p.child2 = std::make_shared<PtrWrapper<T>>( PtrWrapper<T>( p.idx ) );
 
