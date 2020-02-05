@@ -77,3 +77,6 @@ cmake-build-debug/einstein
 >>>>>>> Stashed changes
 cmake-build-debug/CMakeFiles/einstein.dir/progress.make
 cmake-build-debug/CMakeFiles/einstein.dir/cmake_clean.cmake
+cmake-build-debug/main_test
+cmake-build-debug/CMakeFiles/main_test.dir/depend.internal
+cmake-build-debug/CMakeFiles/main_test.dir/CXX.includecache
