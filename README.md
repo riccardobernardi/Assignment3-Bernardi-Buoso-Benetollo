@@ -35,7 +35,7 @@ template<typename T, class E1, class E2> class einstein_expression<T,dynamic,ein
 ```
 
 We were asked to trasform the current version of the library into a multithreaded one and avoiding to modify the multiplication operation. After that we were asked to parallelise only on non-repeated indexes of the tensors. 
-We solved the problem by the mean of standard threads provided by the c++ standard library. Plus we also used a testing library developed by some students during this course available on github (see the references).
+We solved the problem by the mean of standard threads provided by the c++ standard library.
 
 ## 2 The move assignment operator
 
@@ -174,7 +174,7 @@ T eval(std::vector<size_t> indxs) {
 }
 ```
 
-## 3 Other solutions
+## 3 Better solutions - Pointer Wrapper
 
 Since we really wanted to improve the performances we approached the problem in a different way. The main problem up to us was that every time the new eval was called it has to start from the start_ptr, to avoid racce conditions, of the expression and iterate to the pointer that correspond to the index given as input. We thought that passing a more complex object to the **eval** function that embedded the pointer and increments it without generating race conditions.
 
@@ -223,7 +223,19 @@ threads.emplace_back(([this, &x](int span, std::vector<size_t> indxs){
 }), span[i], thread_indxs[i]);
 ```
 
-The function **setPtr()** intialize the pointer of PtrWrapper to the position given by the index takes as input by the constructor.
+The function **setPtr()** intialize the pointer of PtrWrapper to the position given by the index takes as input by the constructor. This function, as in the previous implementaition, prevents race conditions because starts from a copy of start_ptr and increment it since obtaining the correct value.
+
+```c++
+void setPtr(PtrWrapper<T>& p) const{
+    p.ptr = start_ptr;
+
+    for(int i = strides.size() - 1; i >= 0; --i){
+        p.ptr += (p.idx)[i] * strides[i];
+    }
+}
+```
+
+The solution obtained by using PtrWrapper has better performances then the previous since the eval function directly return the data pointed by the pointer contained in the PtrWrapper object without calculating it each time the function is called, and the increment of this pointer doesn't introduce overhead because it's done in parallel with the increment of the index.
 
 ### 3.1 PtrWrapper in different expressions
 
@@ -242,11 +254,13 @@ void setPtr(PtrWrapper<T>& p) const{
 }
 ```
 
+With this implementation we build a tree of PtrWrappers with their children that has at its leafs the objects that contain the pointer to the data of the tensor. So each thread builds its own tree of PtrWrapper with the pointers to the data matching the index on which the thread is working.
+
 ## 4 Performances
 
 We have measured all the performances at every test and we have noticed that only a small improvement was introduced by the mean of the multithreading. So we tried to add some tests with a lower number of rank but many thousands of cells for every index. At this point the improvement becomes visible and very effective.
 
-We also decided to go deeper into the possible operations that could perform better exploiting the threads regardless of the multi-threading overhead. We tried so to produce big tensors of low rank, no contractions an no multiplications but only summations. We ended up discovering that with a rank 3 tensor with dimensions <1000,1000,1000> summed for itself our multi-threaded version can gain up to 100 of milliseconds with respect to the sequential version.
+We also decided to go deeper into the possible operations that could perform better exploiting the threads regardless of the multi-threading overhead. We tried so to produce big tensors of low rank. We ended up discovering that with a rank 3 tensor with dimensions <1000,1000,1000> summed for itself our multi-threaded version can perfom more then twice better with respect to the sequential version.
 
 An example of the tests we tried is here below:
 
@@ -267,7 +281,7 @@ void test_great_matrix_low_rank_n_thread(){
 }
 ```
 
-Some of the measure that we gained are summarised here below:
+Some remarkable measure that we gained are summarised here below:
 
 | Test              | Operation             | Sequential            | Concurrent             |
 | ----------------------- | --------------------- | --------------------- | ---------------------- |
