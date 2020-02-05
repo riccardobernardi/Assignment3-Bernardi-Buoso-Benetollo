@@ -468,6 +468,8 @@ void test_very_long_mult_1_thread_second_try(){
     auto k=new_index;
 
     t6(k)=t1(k,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i);
+    std::cout << "here the result of [t6(k)=t1(k,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)];" << std::endl;
+
     std::cout << "here the result;" << std::endl;
     for(auto iter=t6.begin(); iter!=t6.end(); ++iter)
         std::cout << *iter << ' ';
@@ -489,6 +491,8 @@ void test_very_long_mult_n_thread_second_try(){
     auto k=new_index;
 
     t6(k)=t1(k,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i);
+    std::cout << "here the result of [t6(k)=t1(k,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)];" << std::endl;
+
     std::cout << "here the result;" << std::endl;
     for(auto iter=t6.begin(); iter!=t6.end(); ++iter)
         std::cout << *iter << ' ';
@@ -510,7 +514,7 @@ void test_very_long_mult_1_thread_third_try(){
     auto k=new_index;
 
     t6(k)=t1(k,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)+t1(k,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i);
-    std::cout << "here the result of [t6=t1(i,i)*t2(j,j)];" << std::endl;
+    std::cout << "here the result of [t6(k)=t1(k,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)+t1(k,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)];" << std::endl;
     for(auto iter=t6.begin(); iter!=t6.end(); ++iter)
         std::cout << *iter << ' ';
     std::cout << '\n';
@@ -531,7 +535,7 @@ void test_very_long_mult_n_thread_third_try(){
     auto k=new_index;
 
     t6(k)=t1(k,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)+t1(k,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i);
-    std::cout << "here the result of [t6=t1(i,i)*t2(j,j)];" << std::endl;
+    std::cout << "here the result of [t6(k)=t1(k,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)+t1(k,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)*t2(j,j)*t2(j,j)*t1(i,i)];" << std::endl;
     for(auto iter=t6.begin(); iter!=t6.end(); ++iter)
         std::cout << *iter << ' ';
     std::cout << '\n';
