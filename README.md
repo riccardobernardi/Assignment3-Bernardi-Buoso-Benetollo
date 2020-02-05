@@ -244,9 +244,9 @@ void setPtr(PtrWrapper<T>& p) const{
 
 ## 4 Performances
 
-We have measured all the performances at every test and we have noticed that no improvement was introduced by the mean of the multithreading. So we tried to silence(ie comment) our entire code searching a lower bound for the improvement and we discovered that the initial code is really efficient and that the code we used to parallelise introduced a little overhead but since the code is already efficient our code was equally performing or worst performing. After this simple experiment we ended up at the idea that the greatest cost of all was the building of the parsing tree. 
+We have measured all the performances at every test and we have noticed that only a small improvement was introduced by the mean of the multithreading. So we tried to add some tests with a lower number of rank but many thousands of cells for every index. At this point the improvement becomes visible and very effective.
 
-We also decided to go deeper into the possible operations that could perform better exploiting the threads regardless of the multi-threading overhead. We tried so to produce big tensors of low rank, no contractions an no multiplications but only summations. We ended up discovering that with a rank 3 tensor with dimensions <400,400,400> summed for itself our multi-threaded version can gain up to 13 seconds with respect to the sequential version.
+We also decided to go deeper into the possible operations that could perform better exploiting the threads regardless of the multi-threading overhead. We tried so to produce big tensors of low rank, no contractions an no multiplications but only summations. We ended up discovering that with a rank 3 tensor with dimensions <1000,1000,1000> summed for itself our multi-threaded version can gain up to 100 of milliseconds with respect to the sequential version.
 
 An example of the tests we tried is here below:
 
@@ -275,7 +275,7 @@ Some of the measure that we gained are summarised here below:
 | test_big_contaction, 1000x1000x1000 | contaction            | 139 ms : 139763 µs    | 15 ms : 15260 µs       |
 | test_big_multiplication, 4000x4000      | mutiplication         | 52 sec : 52813747 µs  | 25 sec : 25164497 µs   |
 
-Many other tests were perfromed but only on few cases there were a perceptible improvement.
+Many other tests were performed but the most significant were presented.
 
 ## 5 Conclusion and further development
 
